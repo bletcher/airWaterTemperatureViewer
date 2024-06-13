@@ -1,0 +1,14 @@
+.DS_Store
+docs/.observablehq/cache/
+node_modules/
+yarn-error.log
+*.docx
+*.rds
+*.RData
+.Rproj.user/
+dist/
+*.csv
+*.parquet
+*.json
+docs/data_hold
+docsMDHold
