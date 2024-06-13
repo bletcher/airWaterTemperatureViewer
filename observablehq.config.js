@@ -15,8 +15,8 @@ export default {
          {name: "Raw Temperature", path: "/rawTemperatureData"},
          {name: "Modelled Temperature", path: "/modelledTemperatureData"},
          //{name: "Flow and temperature", path: "/temperatureFlowData"}
-       ]
-      },
+       ] 
+      }/*,
       {
        name: "Testing",
        pages: [
@@ -32,7 +32,7 @@ export default {
         //{name: "duckDB test - parquet files by site", path: "/duckDBTestBySite"}
         //{name: "parquetDataLoaderTest", path: "/parquetDataLoaderTest"}
       ]  
-    }
+    } */
    ],
 
   // Some additional configuration options and their defaults:

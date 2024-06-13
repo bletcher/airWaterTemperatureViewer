@@ -13,7 +13,7 @@ Add .R and .RScript to [Path](https://info201.github.io/r-intro.html#windows-com
 3) In vsCode, open the folder for the project and then publish to a new repo (from the `source control` badge).
 4) Make changes for deploying suggested [here](https://observablehq.com/framework/deploying#other-hosting-services).  
 5) In the terminal, run `npm run build` to build the site in /dist.  
-6) Copy files from /dist to temperature-viewer S3 bucket.  
+6) Copy files from /dist to temperature-viewer S3 bucket. Best to open file explorer and drag the files and folders in /dist into the S3 upload space.  
 
 
 Notes:

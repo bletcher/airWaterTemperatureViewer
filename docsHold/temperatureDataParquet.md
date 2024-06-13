@@ -19,7 +19,7 @@ import * as d3 from "npm:d3";
 //import {dt, dtYDAY, dtYDAY_Week, dtYDAY_Month, dtHOUR, dtHOUR_ampPhase, dtHOUR_params_pred, samples} from "./components/variables.js";
 //import {db} from "./components/variablesParquet.js"; 
 
-import {VA_data} from "./components/variablesParquet.js";
+import {VA_data} from "./components/variables.js";
 ```
 
 ```js

@@ -56,7 +56,7 @@ const initialSite = [...new Set(dt.map(d => d.siteID))].sort()[0];//"PA_01FL";
 The dataset for exploration here is from Shenandoah National Park.  
 During development of this application, the dataset is limited to three sites for each area ["PA_01FL", "PA_06FL", "PA_10FL", "PI_01FL", "PI_06FL", "PI_10FL", "SR_01FL", "SR_06FL", "SR_10FL"] to deal with large file sizes with the whole dataset.  
 It will take a while for the dataset to load...  
-Data are in **parquet files** for each aggreagation level and are read in based on the aggregation level selector above.  
+Data are in **parquet files** for each aggregation level and are read in based on the aggregation level selector above.  
 
 ## Raw data summary
 

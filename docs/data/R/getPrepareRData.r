@@ -13,10 +13,10 @@ library(tidyverse)
 library(usethis)
 usethis::gh_token_help()
 
-library(devtools)
-devtools::install_github("timothy-d-lambert/dePAWT")
-remotes::install_github("timothy-d-lambert/dePAWT")
-library(dePAWT)
+#library(devtools)
+#devtools::install_github("timothy-d-lambert/dePAWT")
+#remotes::install_github("timothy-d-lambert/dePAWT")
+#library(dePAWT)
 
 
 source("./docs/data/R/rForSourcing.R")
