@@ -10,7 +10,8 @@ export function plotAirWater(dIn, lineData, selectedShowAWLines, {width} = {}) {
   // Calculate a separate regression for each group
   const regressions = Array.from(groupedData, ([siteID, years]) => {
     return Array.from(years, ([year, data]) => {
-      const pairs = data.map(d => [d.airTemperature, d.waterTemperature]);
+      const pairs = data.filter(d => !isNaN(d.airTemperature) && !isNaN(d.waterTemperature))
+                        .map(d => [d.airTemperature, d.waterTemperature]);
       const linReg = regression.linear(pairs)
       const slope = linReg.equation[0];
       const intercept = linReg.equation[1];
@@ -23,17 +24,6 @@ export function plotAirWater(dIn, lineData, selectedShowAWLines, {width} = {}) {
       };
     });
   }).flat();
-
-  const xAxisRel = d3.quantile(
-    d.map(d => d.airTemperature).sort(d3.ascending),
-    0.01
-  );
-
-  const yAxisRel = d3.quantile(
-    d.map(d => d.waterTemperature).sort(d3.ascending),
-    0.7
-  );
-  
 
   const colorScale = Plot.scale({
     color: {
@@ -91,8 +81,9 @@ export function plotAirWater(dIn, lineData, selectedShowAWLines, {width} = {}) {
       Plot.text(regressions, 
         {
           text: d => `Slope: ${d.slope.toFixed(2)}`, // Format the slope to 2 decimal places
-          x: xAxisRel, 
-          y: yAxisRel,
+          frameAnchor: "top-left",
+          dy: 20,
+          dx: 15,
           fy: "year",
           fx: "siteID",
           fill: "black",
@@ -105,21 +96,12 @@ export function plotAirWater(dIn, lineData, selectedShowAWLines, {width} = {}) {
 
 export function plotHexBin(d, lineData, binWidthIn, selectedRAsCount, {width} = {}) {
 
-  const pairs = d.map(dd => [dd.airTemperature, dd.waterTemperature]);
+  const pairs = d.filter(dd => !isNaN(dd.airTemperature) && !isNaN(dd.waterTemperature))
+                 .map(dd => [dd.airTemperature, dd.waterTemperature]);
   const linReg = regression.linear(pairs);
   const slope = linReg.equation[0];
   const intercept = linReg.equation[1];
   const reg = [{slope, intercept}];
-
-  const xAxisRel = d3.quantile(
-    d.map(d => d.airTemperature).sort(d3.ascending),
-    0.005
-  );
-
-  const yAxisRel = d3.quantile(
-    d.map(d => d.waterTemperature).sort(d3.ascending),
-    0.88
-  );
 
   return Plot.plot({
     width,
@@ -144,8 +126,9 @@ export function plotHexBin(d, lineData, binWidthIn, selectedRAsCount, {width} = 
       Plot.text(reg, 
         {
           text: d => `Slope: ${d.slope.toFixed(2)}`, 
-          x: xAxisRel, 
-          y: yAxisRel,
+          frameAnchor: "top-left",
+          dy: 30,
+          dx: 30,
           fill: "black",
           fontSize: 16
         }

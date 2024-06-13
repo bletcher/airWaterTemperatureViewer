@@ -10,13 +10,12 @@ library(arrow)
 library(minpack.lm)
 library(tidyverse)
 
-library(usethis)
-usethis::gh_token_help()
+#library(usethis)
+#usethis::use_git_config(user.name = "bletcher", user.email = "bletcher@eco.umass.edu")1
 
-#library(devtools)
-#devtools::install_github("timothy-d-lambert/dePAWT")
+#library(remotes)
 #remotes::install_github("timothy-d-lambert/dePAWT")
-#library(dePAWT)
+library(dePAWT)
 
 
 source("./docs/data/R/rForSourcing.R")
@@ -44,7 +43,7 @@ writeParquet <- function(dataIn, pathIn, dataNameIn) {
   write_dataset(
     dataset = dataIn,
     path = pathIn,
-    format = "parquet",
+    format = "parquet", # 'snappy' is the default compression
     basename_template = paste0(dataNameIn, "-{i}.parquet")
   )
 }
@@ -116,7 +115,7 @@ writeParquet(
 )
 
 
-
+#######################################################################
 ##  params  ###########################################################
 # Get parameter estimates
 # minimum data length for estimation
@@ -152,3 +151,9 @@ writeParquet(paramsPred, path, dataName)
 # Write to csv so we can read this into other R scripts. This is not a reactive data loader.
 # will be able to delete this from the parquet version
 write_csv(params, "./docs/data/dataFromR/dtHOUR_params.csv")
+
+###  dePAWT  ##########################################################
+# Get parameter estimates using Tim's function
+# Downloaded the file from Tim's dePAWT repo and load here
+
+

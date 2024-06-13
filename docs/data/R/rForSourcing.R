@@ -27,7 +27,11 @@ getDT <- function(d) {
       week = week(DateTime_EST),
       hour = hour(DateTime_EST),
       yday = yday(DateTime_EST),
-      hmsProp = (hour(DateTime_EST)*60*60 + minute(DateTime_EST)*60 + second(DateTime_EST))/(24*60*60),
+      hmsProp = (
+        hour(DateTime_EST) * 60 * 60 +
+        minute(DateTime_EST) * 60 +
+        second(DateTime_EST)
+      ) / (24 * 60 * 60),
       ydayHMS = yday + hmsProp,
       dischargeLog10 = log10(Discharge_Hobo_cfs),
     ) |>
@@ -147,7 +151,7 @@ extract_params <- function(model) {
   }, error = function(e) {
     NULL
   })
- 
+
   return(params)
 }
 

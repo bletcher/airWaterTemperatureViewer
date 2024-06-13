@@ -9,11 +9,29 @@ import {ampPhase, paramsPred, dtHour, get1to1Line, getBinWidth} from "./componen
 import {VA_data} from "./components/variables.js";
 ```
 
+```js
+//const tmp = FileAttachment("tmp.parquet").parquet();
+```
+
+```js
+//tmp
+```
+
+**Steps**: aggregation level &rarr; filtering (`sites, years, seasons`) &rarr; raw data plots
+
+Data can be aggregated across time scales ranging from the `raw data`, to `daily` (the default), to `annual`. All figures below will show data from the selected aggregation level. Aggregation here is simply calculating stie-specific mean air and water temperatures for the selected aggregation level.  
+
+---
+
+## Data aggregation
+
 <div class="grid grid-cols-4">
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
     ${selectAggregation}
   </div>
 </div>
+
+---
 
 ```js
 const aggregation = new Map([
@@ -42,11 +60,11 @@ const dt = [...dtIn];
 ```
 
 ```js
-display(dtIn)
+//display(dtIn)
 ```
 
 ```js
-dt
+//dt
 ```
 
 ```js
@@ -76,6 +94,8 @@ Data are in **parquet files** for each aggregation level and are read in based o
 </div>
 
 ---
+
+## Data filtering
 
 Filter by sites, years and seasons. Use either the map or the dropdown to select sites.  
 Click on a site marker to select or unselect a site. Selected sites will be <span style="color:#eb8117;">*orange*</span>.  
@@ -152,7 +172,7 @@ const selectedShowAir = Generators.input(showAir);
 const showWater = (Inputs.radio([true, false], {label: "Show Water Temp?", value: true}));
 const selectedShowWater = Generators.input(showWater);
 
-const showAWLines = (Inputs.radio([true, false], {label: "Show lines?", value: true}));
+const showAWLines = (Inputs.radio([true, false], {label: "Show grey lines?", value: true}));
 const selectedShowAWLines = Generators.input(showAWLines);
 
 const facetDaily = (Inputs.radio([true, false], {label: "Graph by day? [not yet implemented]", value: true}));
