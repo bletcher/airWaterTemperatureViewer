@@ -1,5 +1,5 @@
 ```js
-import { plotTimeSeries, plotCurveHover, plotPhaseAmp } from "./components/modelledTemperatureDataPlots.js";
+import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotPhaseAmpXY, deParamsPKTimeSeries, deParamsTempTimeSeries } from "./components/modelledTemperatureDataPlots.js";
 //import {interval} from 'https://observablehq.com/@mootari/range-slider';
 import * as d3 from "npm:d3";
 ```
@@ -57,7 +57,7 @@ const selectedFacetYearly = Generators.input(facetYearly);
 
 const sites = [...new Set(dtPredict.map(d => d.siteID))].sort();
 const selectSites = Inputs.select(sites, {
-  //value: sites[0],
+  value: "SR_01FL",//sites[0],
   //value: markersSelected, 
   multiple: 8, width: 100, label: "Select sites"});
 const selectedSites = Generators.input(selectSites);
@@ -78,7 +78,7 @@ sites
 ```
 ---
 
-## Plot time series
+## Plot raw data time series
 
 <div class="grid grid-cols-2"> 
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
@@ -110,8 +110,8 @@ const dtMetricsHovered = timeSeriesHover === null ?
 ```js
 plotCurveHover(dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID)
 ```
-
-Need to fix r2s. Check on values and add for air
+In the graph above, the curve it for the sine model is the solid line and for the differential equation model (`de`) the lide is dashed. There is no `de` model for the air temperature.  
+*Need to fix r2s. Check on values and add for air*
 
 ## Phase shift and amplitude
 ### sine model
@@ -124,10 +124,145 @@ plotPhaseAmp(dtMetricsFiltered.filter(d => d.model === "sine"), groupSiteID)
 plotPhaseAmp(dtMetricsFiltered.filter(d => d.model === "de"), groupSiteID)
 ```
 
+---
+
+## Phase shift and amplitude XY plot
+### sine model
+```js
+plotPhaseAmpXY(dtMetricsFiltered.filter(d => d.model === "sine"), groupSiteID)
+```
+
+### de model
+```js
+plotPhaseAmpXY(dtMetricsFiltered.filter(d => d.model === "de"), groupSiteID)
+```
+
+
 ```js
 ```
 
 dtMetricsFiltered
 ```js
 dtMetricsFiltered
+```
+
+ ## Parameter time series
+
+
+```js
+const dtPredictGrouped = d3.groups(
+  dtPredictFiltered, 
+  d => d.siteID,
+  d => d.year,
+  d => d.yday
+  );
+
+const airTemperatureAverages = dtPredictGrouped.flatMap(([siteID, yearGroups]) => 
+  yearGroups.flatMap(([year, ydayGroups]) => 
+    ydayGroups.map(([yday, values]) => {
+      const averageAirTemperature = d3.mean(values, d => d.airTemperature);
+      return {siteID, year, yday, averageAirTemperature};
+    })
+  )
+);
+
+```
+
+```js
+airTemperatureAverages
+```
+
+
+k
+```js
+Plot.plot({
+  color: {legend: true},
+  marks: [
+    Plot.rectY(
+      dtMetricsFiltered.filter(
+        d => d.p >= 0 && d.p <= 1 && d.k >= 0 && d.k <= 50
+      ), 
+  Plot.binX({y: "count"}, {x: "k"})),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+p
+```js
+Plot.plot({
+  color: {legend: true},
+  marks: [
+    Plot.rectY(
+      dtMetricsFiltered.filter(
+        d => d.p >= 0 && d.p <= 1 && d.k >= 0 && d.k <= 50
+      ), 
+  Plot.binX({y: "count"}, {x: "p"})),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+```js
+deParamsPKTimeSeries(
+  dtMetricsFiltered.filter(
+    d => d.p >= 0 && d.p <= 1 && d.k >= 0 && d.k <= 50
+  ), 
+  airTemperatureAverages, 
+  groupSiteID
+)
+```
+
+Tg
+```js
+Plot.plot({
+  color: {legend: true},
+  marks: [
+    Plot.rectY(
+      dtMetricsFiltered.filter(
+        d => d.Tg >= -10 && d.Tg <= 100 
+      ), 
+  Plot.binX({y: "count"}, {x: "Tg"})),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+```js
+deParamsTempTimeSeries(
+  dtMetricsFiltered.filter(
+    d => d.Tg >= -10 && d.Tg <= 40 
+  ), 
+  d => d.k
+)
+```
+
+p
+```js
+d3.extent(dtMetricsFiltered, d => d.p)
+```
+
+k
+```js
+d3.extent(dtMetricsFiltered, d => d.k)
+```
+
+k2
+```js
+d3.extent(dtMetricsFiltered.filter(
+        d => d.p >= 0 && d.p <= 1 &&
+        d.k >= -10 && d.k <= 10
+      ), d => d.k)
+```
+      
+
+
+airTemperatureAverages
+```js
+d3.extent(airTemperatureAverages, d => d.averageAirTemperature)
+```
+
+Tg
+```js
+d3.extent(dtMetricsFiltered.filter(d => d.Tg > -100 && d.Tg < 50), d => d.Tg)
 ```
