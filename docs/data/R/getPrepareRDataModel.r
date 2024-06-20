@@ -59,7 +59,16 @@ dataIn_metrics <- df_metrics_de |>
   ) |>
   rename(
     siteID = site,
-    rSquared = R2
+    rSquared = R2,
+    amplitudeRatio = amplitude_ratio,
+    phaseLag = phase_lag,
+    meanOffset = mean_offset,
+    meanRatio = mean_ratio,
+    phaseWater = phase_water,
+    phaseAir = phase_air,
+    amplitudeWater = amplitude_water,
+    amplitudeAir = amplitude_air
+
     #airTemperature = Ta_bar,
     #waterTemperature = Tw_bar
   )

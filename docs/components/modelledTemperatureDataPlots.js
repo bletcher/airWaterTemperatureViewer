@@ -178,3 +178,57 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
   }
 }
 
+export function plotPhaseAmp(d, {width} = {}) {
+  
+  // for 2nd y-axis
+  // https://observablehq.com/@observablehq/plot-dual-axis
+  const v1 = (d) => d.amplitudeRatio;
+  const v2 = (d) => d.phaseLag;
+  const y2 = d3.scaleLinear(d3.extent(d, v2), d3.extent(d, v1));
+  //const y2 = d3.scaleLinear(d3.extent(d, v2), [0, d3.max(d, v1)]);
+
+  return Plot.plot({
+    width,
+    marginTop: 30,
+    marginRight: 30,
+    //color: {legend: true, label: "Day of year"},
+    x: {label: "Day of year"},
+    y: {axis: "left", label: "Amplitude"},
+    marks: [
+      Plot.frame({stroke: "lightgrey"}),
+      Plot.dot(d,
+        {
+          x: "yday", 
+          y: "amplitudeRatio", 
+          stroke: "grey", 
+          fy: "year",
+          fx: "siteID",
+          tip: true
+        }
+      ),
+
+      Plot.axisY(y2.ticks(), 
+        {
+          color: "#870c10", 
+          anchor: "right", 
+          label: "Phase difference",
+          y: y2, 
+          tickFormat: y2.tickFormat()
+        }
+      ), 
+
+      Plot.dot(d,
+        Plot.mapY((D) => D.map(y2),  
+          {
+            x: "yday", 
+            y: "phaseLag", 
+            stroke: "#870c10",  
+            fy: "year",
+            fx: "siteID",
+            tip: true
+          }
+      ))
+    ]
+  });
+}
+

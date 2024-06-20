@@ -38,6 +38,13 @@ export function filterBySiteID_year_yday(d, selectedSites, selectedYears, select
   );
 }
 
+export function filterBySiteID_year(d, selectedSites, selectedYears) {
+  return d.filter(d => 
+    selectedSites.includes(d.siteID) && 
+    selectedYears.includes(d.year)
+  );
+}
+
 export function get1to1Line(dt) {
   const rangeX = d3.extent(dt.map(d => d.airTemperature));
   const rangeY = d3.extent(dt.map(d => d.waterTemperature));
