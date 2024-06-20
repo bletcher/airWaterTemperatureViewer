@@ -16,10 +16,10 @@ import * as d3 from "npm:d3";
 ```
 
 ```js
-//import {dt, dtYDAY, dtYDAY_Week, dtYDAY_Month, dtHOUR, dtHOUR_ampPhase, dtHOUR_params_pred, samples} from "./components/variables.js";
+//import {dt, dtYDAY, dtYDAY_Week, dtYDAY_Month, dtHOUR, dtHOUR_ampPhase, dtHOUR_params_pred, samples} from "./components/rawTemperatureVariables.js";
 //import {db} from "./components/variablesParquet.js"; 
 
-import {VA_data} from "./components/variables.js";
+import {VA_data} from "./components/rawTemperatureVariables.js";
 ```
 
 ```js
@@ -544,7 +544,7 @@ const dtAggregated = await aggregateDT(selectedAggregators);
 </div>
 
 ```js
-//import { getAggregatedData } from "/components/variables.js";
+//import { getAggregatedData } from "/components/rawTemperatureVariables.js";
 //const aggregatedData = getAggregatedData(selectedAggregators, dtFiltered, dtYDAYFiltered, dtYDAY_Week_Filtered, dtYDAY_Month_Filtered)
 ```
 

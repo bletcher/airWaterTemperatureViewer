@@ -15,9 +15,9 @@ import * as d3 from "npm:d3";
 ```
 
 ```js
-import {dt, dtYDAY, dtYDAY_Week, dtYDAY_Month, dtHOUR, dtHOUR_ampPhase, dtHOUR_params_pred, samples} from "./components/variables.js";
+import {dt, dtYDAY, dtYDAY_Week, dtYDAY_Month, dtHOUR, dtHOUR_ampPhase, dtHOUR_params_pred, samples} from "./components/rawTemperatureVariables.js";
 
-import {VA_data} from "./components/variables.js";
+import {VA_data} from "./components/rawTemperatureVariables.js";
 ```
 
 ```js
@@ -165,7 +165,7 @@ const selectedAbsMinMax = Generators.input(selectAbsMinMax);
 // filtered objects //
 //////////////////////
 
-import { filterBySiteID_year, filterBySiteID_year_season, filterBySiteID_year_yday } from "/components/variables.js";
+import { filterBySiteID_year, filterBySiteID_year_season, filterBySiteID_year_yday } from "/components/rawTemperatureVariables.js";
 
 const dtFiltered = filterBySiteID_year_season(dt, selectedSites, selectedYears, selectedSeasons)
 const dtYDAYFiltered = filterBySiteID_year_season(dtYDAY, selectedSites, selectedYears, selectedSeasons)
@@ -362,7 +362,7 @@ selectSites.addEventListener('change', function() {
 </div>
 
 ```js
-import { getAggregatedData } from "/components/variables.js";
+import { getAggregatedData } from "/components/rawTemperatureVariables.js";
 const aggregatedData = getAggregatedData(selectedAggregators, dtFiltered, dtYDAYFiltered, dtYDAY_Week_Filtered, dtYDAY_Month_Filtered)
 ```
 

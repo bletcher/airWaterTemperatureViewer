@@ -2,28 +2,18 @@ import * as Plot from "npm:@observablehq/plot";
 import * as d3 from "npm:d3";
 import regression from 'regression';
 
-export function plotAirWater(dIn, lineData, selectedShowAWLines, {width} = {}) {
+export function plotAirWater(dIn, regressions, lineData, selectedShowAWLines, selectedRAsDischarge, selectedMaxR, {width} = {}) {
 
   const d = dIn.filter(dd => !isNaN(dd.airTemperature) && !isNaN(dd.waterTemperature))
-  const groupedData = d3.group(d, d => d.siteID, d => d.year);
 
-  // Calculate a separate regression for each group
-  const regressions = Array.from(groupedData, ([siteID, years]) => {
-    return Array.from(years, ([year, data]) => {
-      const pairs = data.filter(d => !isNaN(d.airTemperature) && !isNaN(d.waterTemperature))
-                        .map(d => [d.airTemperature, d.waterTemperature]);
-      const linReg = regression.linear(pairs)
-      const slope = linReg.equation[0];
-      const intercept = linReg.equation[1];
+  const minR = 4;
 
-      return {
-        siteID,
-        year,
-        slope,
-        intercept
-      };
-    });
-  }).flat();
+  const dischargeScale = d3.scaleLinear(
+    d3.extent(d, d => d.dischargeLog10),
+    [minR, selectedMaxR]
+    //[3, 50]
+  );
+console.log(selectedMaxR, dischargeScale(0))
 
   const colorScale = Plot.scale({
     color: {
@@ -61,6 +51,10 @@ export function plotAirWater(dIn, lineData, selectedShowAWLines, {width} = {}) {
           x: "airTemperature", 
           y: "waterTemperature", 
           stroke: "yday",
+          r: selectedRAsDischarge ?  
+              ((dd) => isNaN(dd.dischargeLog10) ? minR : dischargeScale(dd.dischargeLog10)) : 
+              minR,
+          symbol: (dd) => isNaN(dd.dischargeLog10),
           fy: "year",
           fx: "siteID",
           tip: true

@@ -2,11 +2,21 @@ library(arrow)
 
 dt <- read_parquet("./docs/data/parquet/shen/dt-0.parquet")
 
-write_dataset(
+ write_dataset(
   dataset = dt,
-  path = "dev/stdout",
-  format = "parquet"
-)
+  path = "/dev/stdout",
+  format = "parquet")
+
+# con <- pipe("cat", "wb")
+# writeBin(
+#   write_dataset(
+#   dataset = dt,
+#   path = "/dev/stdout",
+#   format = "parquet"),
+#   con
+# )
+# flush(con)
+
 
 
 # dev_stdout = function (underlying_device = png, ...) {

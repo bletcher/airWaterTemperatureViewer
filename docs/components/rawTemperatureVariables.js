@@ -1,6 +1,7 @@
 import {FileAttachment} from "npm:@observablehq/stdlib";
 //import {DuckDBClient} from "npm:@observablehq/duckdb";
 import * as d3 from "npm:d3";
+import regression from 'regression';
 
 /*
 export const dt = await FileAttachment("../data/dt.csv").csv({typed: true});
@@ -79,4 +80,29 @@ export function getAggregatedData(selectedAggregators, dtFiltered, dtYDAYFiltere
   });
 
   return aggregatedData;
+}
+
+export function getRegressions(dIn) {
+  const d = dIn.filter(dd => !isNaN(dd.airTemperature) && !isNaN(dd.waterTemperature))
+  const groupedData = d3.group(d, d => d.siteID, d => d.year);
+
+  // Calculate a separate regression for each group
+  const regressions = Array.from(groupedData, ([siteID, years]) => {
+    return Array.from(years, ([year, data]) => {
+      const pairs = data.filter(d => !isNaN(d.airTemperature) && !isNaN(d.waterTemperature))
+                        .map(d => [d.airTemperature, d.waterTemperature]);
+      const linReg = regression.linear(pairs)
+      const slope = linReg.equation[0];
+      const intercept = linReg.equation[1];
+
+      return {
+        siteID,
+        year,
+        slope,
+        intercept
+      };
+    });
+  }).flat();
+
+  return regressions;
 }

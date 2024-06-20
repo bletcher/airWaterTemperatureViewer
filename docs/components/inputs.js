@@ -14,7 +14,7 @@ export function getInputs(dt) {
 
 import {Inputs} from "npm:@observablehq/inputs";
 
-import {dt} from "variables.js";
+import {dt} from "rawTemperatureVariables.js";
 
 const sites0 = [...new Set(dt.map(d => d.siteID))].sort();
 const selectSites0 = (Inputs.select(sites0, {value: sites0, multiple: 8, width: 100, label: "Select sites"}));

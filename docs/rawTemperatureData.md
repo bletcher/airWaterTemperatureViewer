@@ -2,11 +2,12 @@
 import {plotTimeSeries, plotAirWater, plotHexBin} from "./components/temperatureDataPlots.js";
 //import {interval} from 'https://observablehq.com/@mootari/range-slider';
 import * as d3 from "npm:d3";
+import regression from 'regression';
 ```
 
 ```js
-import {ampPhase, paramsPred, dtHour, get1to1Line, getBinWidth} from "./components/variables.js";
-import {VA_data} from "./components/variables.js";
+import {ampPhase, paramsPred, dtHour, get1to1Line, getBinWidth, getRegressions} from "./components/rawTemperatureVariables.js";
+import {VA_data} from "./components/rawTemperatureVariables.js";
 ```
 
 ```js
@@ -19,7 +20,7 @@ import {VA_data} from "./components/variables.js";
 
 **Steps**: aggregation level &rarr; filtering (`sites, years, seasons`) &rarr; raw data plots
 
-Data can be aggregated across time scales ranging from the `raw data`, to `daily` (the default), to `annual`. All figures below will show data from the selected aggregation level. Aggregation here is simply calculating stie-specific mean air and water temperatures for the selected aggregation level.  
+Data can be aggregated across time scales ranging from the `raw data`, to `daily` (the default), to `annual`. All figures below will show data from the selected aggregation level. Aggregation here is simply calculating site-specific mean air and water temperatures for the selected aggregation level.  
 
 ---
 
@@ -184,6 +185,12 @@ const selectedFacetYearly = Generators.input(facetYearly);
 const rAsCount = (Inputs.radio([true, false], {label: "Hexbin size = count?", value: false}));
 const selectedRAsCount = Generators.input(rAsCount);
 
+const rAsDischarge = (Inputs.radio([true, false], {label: "Show point size = discharge?", value: false}));
+const selectedRAsDischarge = Generators.input(rAsDischarge);
+
+const selectMaxR = (Inputs.range([5, 200], {value: 35, step: 1, width: 200, label: "Select maximum radius for discharge"}));
+const selectedMaxR = Generators.input(selectMaxR);
+
 /*
 const aggregators = ["Monthly", "Weekly", "Daily", "15 Minute"];
 const selectAggregators = (Inputs.select(aggregators, {value: "Daily", multiple: false, width: 90, label: "Select aggregation level"}));
@@ -208,7 +215,7 @@ const selectedAbsMinMax = Generators.input(selectAbsMinMax);
 // filtered objects //
 //////////////////////
 
-import { filterBySiteID_year, filterBySiteID_year_season, filterBySiteID_year_yday } from "/components/variables.js";
+import { filterBySiteID_year, filterBySiteID_year_season, filterBySiteID_year_yday } from "/components/rawTemperatureVariables.js";
 
 const dtFiltered = filterBySiteID_year_season(dt, selectedSites, selectedYears, selectedSeasons)
 /*
@@ -402,11 +409,13 @@ plotTimeSeries(dtFiltered, groupSiteID, selectedShowWater, selectedShowAir, sele
 ---
 
 ## Plot air vs water temperature
-Black line is the 1:1 line. Dashed line is a linear regression, with indicated slope.
+Black line is the 1:1 line. Dashed line is a linear regression, with indicated slope.  
+Points that are circles have assosciated dischage values and crosses do not.
 
 <div class="grid grid-cols-4">
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${showAWLines}
+      ${showAWLines}
+      ${rAsDischarge} ${selectMaxR}
   </div>
 </div>
 
@@ -415,7 +424,11 @@ const lineData = get1to1Line(dtFiltered);
 ```
 
 ```js
-plotAirWater(dtFiltered, lineData, selectedShowAWLines)
+  const regressionsAirWater = getRegressions(dtFiltered);
+```
+
+```js
+plotAirWater(dtFiltered, regressionsAirWater, lineData, selectedShowAWLines, selectedRAsDischarge, selectedMaxR)
 ```
 
 ---
@@ -438,3 +451,29 @@ const binWidthIn = getBinWidth(dtFiltered)
 plotHexBin(dtFiltered, lineData, binWidthIn, selectedRAsCount)
 ```
 
+```js
+dtFiltered
+```
+
+```js
+dtFiltered.map(d => d.dischargeLog10)
+//dtFiltered.map(d => [...new Set(d.dischargeLog10)])
+```
+
+```js
+  const dischargeScale = d3.scaleLinear(
+      d3.extent(dtFiltered, d => d.dischargeLog10),
+      [3, 6]
+  );
+```
+
+```js
+dischargeScale(0)
+```
+
+```js
+
+```
+
+```js
+```
