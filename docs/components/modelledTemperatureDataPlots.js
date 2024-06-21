@@ -256,11 +256,49 @@ export function plotPhaseAmpXY(d, years, {width} = {}) {
   });
 }
 
+
+function joinModelData(dIn, xVar, yVar, xMod, yMod) {
+  // Step 1: Correctly Filter Data by Model
+  const xModData = dIn.filter(d => d.model === xMod);
+  const yModData = dIn.filter(d => d.model === yMod);
+
+  // Step 2: Extract Unique Combinations (assuming unique in context of model)
+  const uniqueCombinations = new Set();
+  dIn.forEach(d => {
+    const combo = `${d.siteID}-${d.year}-${d.yday}`;
+    uniqueCombinations.add(combo);
+  });
+
+  // Step 3: Join Data
+  const joinedData = [];
+  uniqueCombinations.forEach(combo => {
+    const [siteID, year, yday] = combo.split('-');
+    const xRecord = xModData.find(d => d.siteID === siteID && d.year == year && d.yday == yday);
+    const yRecord = yModData.find(d => d.siteID === siteID && d.year == year && d.yday == yday);
+
+    if (xRecord && yRecord) {
+      joinedData.push({
+        siteID: siteID,
+        year: year,
+        yday: yday,
+        x: xRecord[xVar], 
+        y: yRecord[yVar]  
+      });
+    }
+  });
+
+  return joinedData;
+}
+
 export function plotX1Y1(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
   
-  const xVarValues = dIn.filter(d => d.model === xMod).map(d => ({ x: d[xVar], year: d.year }));
-  const yVarValues = dIn.filter(d => d.model === yMod).map(d => d[yVar]);
-  const dXY = xVarValues.map((xObj, i) => ({ ...xObj, y: yVarValues[i] }));
+  //const xVarValues = dIn.filter(d => d.model === xMod).map(d => ({ x: d[xVar], year: d.year }));
+  //const yVarValues = dIn.filter(d => d.model === yMod).map(d => d[yVar]);
+  //const dXY = xVarValues.map((xObj, i) => ({ ...xObj, y: yVarValues[i] }));
+
+  const dXY = joinModelData(dIn, xVar, yVar, xMod, yMod);
+
+  console.log(dIn, dXY)
 
   const colorScale = Plot.scale({
     color: {
@@ -292,6 +330,7 @@ export function plotX1Y1(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
     ]
   });
 }
+
 
 export function plotY1Y2(d, y1Var, y2Var, y1Mod, y2Mod, {width} = {}) {
   

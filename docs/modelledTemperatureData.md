@@ -240,12 +240,10 @@ Plot.plot({
 
 ---
 
-### Time series graphs for `k` and `p`
-
 ```js
-deParamsPKTimeSeries(
-  dtMetricsFilteredByParams
-)
+//deParamsPKTimeSeries(
+ // dtMetricsFilteredByParams
+//)
 ```
 
 ---
@@ -287,7 +285,8 @@ Plot.plot({
 ---
 
 ### Time series graphs for `Tg` and `average daily air temperature`
-Predicted groundwater temperature in grey, observed air temperature in blue.
+Predicted groundwater temperature in grey, observed air temperature in blue.  
+Need to add observend air and water temps to `dtMetricsFiltered`
 
 ```js
 deParamsTempTimeSeries(
