@@ -1,5 +1,5 @@
 ```js
-import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotX1Y1, plotPhaseAmpXY, deParamsPKTimeSeries, deParamsTempTimeSeries } from "./components/modelledTemperatureDataPlots.js";
+import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotPhaseAmpXY, deParamsPKTimeSeries, deParamsTempTimeSeries } from "./components/modelledTemperatureDataPlots.js";
 //import {interval} from 'https://observablehq.com/@mootari/range-slider';
 import * as d3 from "npm:d3";
 ```
@@ -62,7 +62,7 @@ const selectSites = Inputs.select(sites, {
 const selectedSites = Generators.input(selectSites);
 
 const years = [...new Set(dtPredict.map(d => d.year))].sort();
-const selectYears = (Inputs.select(years, {value: [years[1]], multiple: true, width: 80, label: "Select years:"}));
+const selectYears = (Inputs.select(years, {value: years, multiple: true, width: 80, label: "Select years:"}));
 const selectedYears = Generators.input(selectYears);
 
 const seasons = ["Spring", "Summer", "Autumn", "Winter"];//[...new Set(dt.map(d => d.season))];
@@ -128,7 +128,69 @@ plotCurveHover(dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID)
 In the graph above, the curve it for the sine model is the solid line and for the differential equation model (`de`) the lide is dashed. There is no `de` model for the air temperature.  
 *Need to fix r2s. Check on values and add for air*
 
+## Phase shift and amplitude
+### sine model
+```js
+plotPhaseAmp(dtMetricsFiltered.filter(d => d.model === "sine"), groupSiteID)
+```
+
+### de model
+```js
+plotPhaseAmp(dtMetricsFiltered.filter(d => d.model === "de"), groupSiteID)
+```
+
 ---
+
+## Plot pairs of parameters
+
+```js
+const modelList = ["sine", "de"];
+
+const selectParamModY1 = (Inputs.select(modelList, {value: [modelList[0]], width: 100, label: "Select model"}));
+const selectedParamModY1 = Generators.input(selectParamModY1);
+
+const selectParamModY2 = (Inputs.select(modelList, {value: [modelList[0]], width: 100, label: "Select model"}));
+const selectedParamModY2 = Generators.input(selectParamModY2);
+```
+
+```js
+const paramList = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio"];
+
+const selectParamY1 = (Inputs.select(paramList, {value: [paramList[0]], width: 100, label: "Select parameter"}));
+const selectedParamY1 = Generators.input(selectParamY1);
+
+const selectParamY2 = (Inputs.select(paramList, {value: [paramList[1]], width: 100, label: "Select parameter"}));
+const selectedParamY2 = Generators.input(selectParamY2);
+```
+
+<div class="grid grid-cols-3"> 
+  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+    Variable 1
+    ${selectParamModY1} ${selectParamY1}
+  </div>
+    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+    Variable 2
+    ${selectParamModY2} ${selectParamY2}
+  </div>
+</div>
+
+```js
+plotY1Y2(dtMetricsFiltered, selectedParamY1, selectedParamY2, selectedParamModY1, selectedParamModY2)
+```
+
+---
+
+## Phase shift and amplitude XY plot
+### sine model
+```js
+plotPhaseAmpXY(dtMetricsFiltered.filter(d => d.model === "sine"), groupSiteID)
+```
+
+### de model
+```js
+plotPhaseAmpXY(dtMetricsFiltered.filter(d => d.model === "de"), groupSiteID)
+```
+
 
 ```js
 ```
@@ -293,75 +355,5 @@ Predicted groundwater temperature in grey, observed air temperature in blue.
 deParamsTempTimeSeries(
   dtMetricsFilteredByParams,
   airTemperatureAverages
-)
-```
-
----
-
-## Plot pairs of parameters over day of year
-
-```js
-const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 100, label: "Select if params are filtered as above"}));
-const selectedParamFilter = Generators.input(selectParamFilter);
-```
-
-```js
-const modelList = ["sine", "de"];
-
-const selectParamModY1 = (Inputs.select(modelList, {value: [modelList[0]], width: 100, label: "Select model"}));
-const selectedParamModY1 = Generators.input(selectParamModY1);
-
-const selectParamModY2 = (Inputs.select(modelList, {value: [modelList[0]], width: 100, label: "Select model"}));
-const selectedParamModY2 = Generators.input(selectParamModY2);
-```
-
-```js
-const paramList = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio"];
-
-const selectParamY1 = (Inputs.select(paramList, {value: [paramList[5]], width: 100, label: "Select parameter"}));
-const selectedParamY1 = Generators.input(selectParamY1);
-
-const selectParamY2 = (Inputs.select(paramList, {value: [paramList[6]], width: 100, label: "Select parameter"}));
-const selectedParamY2 = Generators.input(selectParamY2);
-```
-
-<div class="grid grid-cols-3"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectParamFilter}
-  </div>
-</div>
-
-<div class="grid grid-cols-3"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    Variable 1 (x in pairs plot)
-    ${selectParamModY1} ${selectParamY1}
-  </div>
-    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    Variable 2 (y in pairs plot)
-    ${selectParamModY2} ${selectParamY2}
-  </div>
-</div>
-
-```js
-plotY1Y2(
-  selectedParamFilter ? dtMetricsFilteredByParams : dtMetricsFiltered, 
-  selectedParamY1, 
-  selectedParamY2, 
-  selectedParamModY1, 
-  selectedParamModY2
-)
-```
-
----
-
-## Plot the pairs of parameters against each other
-
-```js
-plotX1Y1(  
-  selectedParamFilter ? dtMetricsFilteredByParams : dtMetricsFiltered,  
-  selectedParamY1, 
-  selectedParamY2, 
-  selectedParamModY1, 
-  selectedParamModY2
 )
 ```
