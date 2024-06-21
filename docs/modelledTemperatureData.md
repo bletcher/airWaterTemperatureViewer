@@ -11,6 +11,8 @@ import { filterBySiteID_year_season, filterBySiteID_year } from "/components/raw
 
 ```
 
+## Select sites and years
+
 <div class="grid grid-cols-4">
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
     ${selectSites}
@@ -40,8 +42,6 @@ dtMetricsFiltered
 dtMetricsFiltered
 ```
 
-```js
-```
 
 ```js
 const groupSiteID = [...new Set(dtPredict.map(d => d.siteID))].sort() // for the colorScale
@@ -57,26 +57,20 @@ const selectedFacetYearly = Generators.input(facetYearly);
 
 const sites = [...new Set(dtPredict.map(d => d.siteID))].sort();
 const selectSites = Inputs.select(sites, {
-  value: "SR_01FL",//sites[0],
-  //value: markersSelected, 
-  multiple: 8, width: 100, label: "Select sites"});
+  value: [sites[0]], // needs to be an array
+  multiple: 8, width: 100, label: "Select sites:"});
 const selectedSites = Generators.input(selectSites);
 
 const years = [...new Set(dtPredict.map(d => d.year))].sort();
-const selectYears = (Inputs.select(years, {value: years, multiple: true, width: 80, label: "Select years"}));
+const selectYears = (Inputs.select(years, {value: years, multiple: true, width: 80, label: "Select years:"}));
 const selectedYears = Generators.input(selectYears);
 
 const seasons = ["Spring", "Summer", "Autumn", "Winter"];//[...new Set(dt.map(d => d.season))];
 const selectSeasons = (Inputs.select(seasons, {value: seasons, multiple: true, width: 80, label: "Select seasons"}));
 const selectedSeasons = Generators.input(selectSeasons);
 
-
 ```
 
-
-```js
-sites
-```
 ---
 
 ## Plot raw data time series
@@ -206,7 +200,7 @@ Extent of raw k = ${roundedKExtent[0]} to ${roundedKExtent[1]}
 const selectMinK = (Inputs.range([kExtent[0].toFixed(0), 0], {value: -50, step: 1, width: 220, label: "Select minimum `k`"}));
 const selectedMinK = Generators.input(selectMinK);
 
-const selectMaxK = (Inputs.range([0, kExtent[1]], {value: 100, step: 1, width: 220, label: "Select maximum `k`"}));
+const selectMaxK = (Inputs.range([0, kExtent[1]], {value: 100, step: 1, width: 220, label: "Select maximum `k`", transform: Math.log}));
 const selectedMaxK = Generators.input(selectMaxK);
 ```
 
@@ -225,7 +219,7 @@ Plot.plot({
 })
 ```
 
-## p
+### p
 
 ```js
 const pExtent = d3.extent(dtMetricsFiltered, d => d.p);
@@ -294,7 +288,7 @@ Extent of raw Tg = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
 const selectMinTg = (Inputs.range([TgExtent[0].toFixed(0), 0], {value: -3, step: 0.1, width: 220, label: "Select minimum `Tg`"}));
 const selectedMinTg = Generators.input(selectMinTg);
 
-const selectMaxTg = (Inputs.range([0, TgExtent[1]], {value: 22, step: 0.1, width: 220, label: "Select maximum `Tg`"}));
+const selectMaxTg = (Inputs.range([0, TgExtent[1]], {value: 22, step: 0.1, width: 220, label: "Select maximum `Tg`", transform: Math.log}));
 const selectedMaxTg = Generators.input(selectMaxTg);
 ```
 
