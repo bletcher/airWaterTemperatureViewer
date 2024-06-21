@@ -70,6 +70,7 @@ const seasons = ["Spring", "Summer", "Autumn", "Winter"];//[...new Set(dt.map(d 
 const selectSeasons = (Inputs.select(seasons, {value: seasons, multiple: true, width: 80, label: "Select seasons"}));
 const selectedSeasons = Generators.input(selectSeasons);
 
+
 ```
 
 
@@ -146,8 +147,9 @@ dtMetricsFiltered
 dtMetricsFiltered
 ```
 
- ## Parameter time series
-
+## Parameter time series
+For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...`. Each parameter can be filtered by selecting the min/max values. The range sliders start with reasonable values, but the full range can be selected.  
+The time series graphs will be updated to show only the data within the selected range.
 
 ```js
 const dtPredictGrouped = d3.groups(
@@ -169,18 +171,53 @@ const airTemperatureAverages = dtPredictGrouped.flatMap(([siteID, yearGroups]) =
 ```
 
 ```js
-airTemperatureAverages
+//airTemperatureAverages
 ```
 
+```js
+const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
+    d => 
+      d.p >= selectedMinP && 
+      d.p <= selectedMaxP && 
+      d.k >= selectedMinK && 
+      d.k <= selectedMaxK &&
+      d.Tg >= selectedMinTg && 
+      d.Tg <= selectedMaxTg
+  )
+```
 
-k
+### k
+
+```js
+const kExtent = d3.extent(dtMetricsFiltered, d => d.k);
+const roundedKExtent = kExtent.map(value => Number(value.toFixed(2)));
+```
+
+Extent of raw k = ${roundedKExtent[0]} to ${roundedKExtent[1]}
+
+
+<div class="grid grid-cols-2"> 
+  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+    ${selectMinK} ${selectMaxK}
+  </div>
+</div>
+
+```js
+const selectMinK = (Inputs.range([kExtent[0].toFixed(0), 0], {value: -50, step: 1, width: 220, label: "Select minimum `k`"}));
+const selectedMinK = Generators.input(selectMinK);
+
+const selectMaxK = (Inputs.range([0, kExtent[1]], {value: 100, step: 1, width: 220, label: "Select maximum `k`"}));
+const selectedMaxK = Generators.input(selectMaxK);
+```
+
 ```js
 Plot.plot({
   color: {legend: true},
+  height: 200,
   marks: [
     Plot.rectY(
       dtMetricsFiltered.filter(
-        d => d.p >= 0 && d.p <= 1 && d.k >= 0 && d.k <= 50
+        d => d.k >= selectedMinK && d.k <= selectedMaxK
       ), 
   Plot.binX({y: "count"}, {x: "k"})),
     Plot.ruleY([0])
@@ -188,14 +225,37 @@ Plot.plot({
 })
 ```
 
-p
+## p
+
+```js
+const pExtent = d3.extent(dtMetricsFiltered, d => d.p);
+const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
+```
+
+Extent of raw p = ${roundedPExtent[0]} to ${roundedPExtent[1]}
+
+<div class="grid grid-cols-2"> 
+  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+    ${selectMinP} ${selectMaxP}
+  </div>
+</div>
+
+```js
+const selectMinP = (Inputs.range([pExtent[0].toFixed(0), 0], {value: 0, step: 0.01, width: 220, label: "Select minimum `p`"}));
+const selectedMinP = Generators.input(selectMinP);
+
+const selectMaxP = (Inputs.range([0, pExtent[1]], {value: 1, step: 0.01, width: 220, label: "Select maximum `p`"}));
+const selectedMaxP = Generators.input(selectMaxP);
+```
+
 ```js
 Plot.plot({
   color: {legend: true},
+  height: 200,
   marks: [
     Plot.rectY(
       dtMetricsFiltered.filter(
-        d => d.p >= 0 && d.p <= 1 && d.k >= 0 && d.k <= 50
+        d => d.p >= selectedMinP && d.p <= selectedMaxP
       ), 
   Plot.binX({y: "count"}, {x: "p"})),
     Plot.ruleY([0])
@@ -203,24 +263,49 @@ Plot.plot({
 })
 ```
 
+---
+
+### Time series graphs for `k` and `p`
+
 ```js
 deParamsPKTimeSeries(
-  dtMetricsFiltered.filter(
-    d => d.p >= 0 && d.p <= 1 && d.k >= 0 && d.k <= 50
-  ), 
-  airTemperatureAverages, 
-  groupSiteID
+  dtMetricsFilteredByParams
 )
 ```
 
-Tg
+---
+
+### Tg
+
+<div class="grid grid-cols-2"> 
+  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+    ${selectMinTg} ${selectMaxTg}
+  </div>
+</div>
+
+```js
+const TgExtent = d3.extent(dtMetricsFiltered, d => d.Tg);
+const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
+```
+
+Extent of raw Tg = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
+
+```js
+const selectMinTg = (Inputs.range([TgExtent[0].toFixed(0), 0], {value: -3, step: 0.1, width: 220, label: "Select minimum `Tg`"}));
+const selectedMinTg = Generators.input(selectMinTg);
+
+const selectMaxTg = (Inputs.range([0, TgExtent[1]], {value: 22, step: 0.1, width: 220, label: "Select maximum `Tg`"}));
+const selectedMaxTg = Generators.input(selectMaxTg);
+```
+
 ```js
 Plot.plot({
   color: {legend: true},
+  height: 200,
   marks: [
     Plot.rectY(
       dtMetricsFiltered.filter(
-        d => d.Tg >= -10 && d.Tg <= 100 
+        d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
       ), 
   Plot.binX({y: "count"}, {x: "Tg"})),
     Plot.ruleY([0])
@@ -228,41 +313,14 @@ Plot.plot({
 })
 ```
 
+---
+
+### Time series graphs for `Tg` and `average daily air temperature`
+Predicted groundwater temperature in grey, observed air temperature in blue.
+
 ```js
 deParamsTempTimeSeries(
-  dtMetricsFiltered.filter(
-    d => d.Tg >= -10 && d.Tg <= 40 
-  ), 
-  d => d.k
+  dtMetricsFilteredByParams,
+  airTemperatureAverages
 )
-```
-
-p
-```js
-d3.extent(dtMetricsFiltered, d => d.p)
-```
-
-k
-```js
-d3.extent(dtMetricsFiltered, d => d.k)
-```
-
-k2
-```js
-d3.extent(dtMetricsFiltered.filter(
-        d => d.p >= 0 && d.p <= 1 &&
-        d.k >= -10 && d.k <= 10
-      ), d => d.k)
-```
-      
-
-
-airTemperatureAverages
-```js
-d3.extent(airTemperatureAverages, d => d.averageAirTemperature)
-```
-
-Tg
-```js
-d3.extent(dtMetricsFiltered.filter(d => d.Tg > -100 && d.Tg < 50), d => d.Tg)
 ```

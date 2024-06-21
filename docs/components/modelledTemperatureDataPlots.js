@@ -256,7 +256,7 @@ export function plotPhaseAmpXY(d, years, {width} = {}) {
   });
 }
 
-export function deParamsPKTimeSeries(d, dPredict, {width} = {}) {
+export function deParamsPKTimeSeries(d, {width} = {}) {
   
   // for 2nd y-axis
   // https://observablehq.com/@observablehq/plot-dual-axis
@@ -274,10 +274,11 @@ export function deParamsPKTimeSeries(d, dPredict, {width} = {}) {
     y: {axis: "left", label: "Proportion groundwater"},
     marks: [
       Plot.frame({stroke: "lightgrey"}),
-      Plot.dot(d,
+      Plot.line(d,
         {
           x: "yday", 
           y: "p", 
+          sort: "yday",
           stroke: "red", 
           fy: "year",
           fx: "siteID",
@@ -295,11 +296,12 @@ export function deParamsPKTimeSeries(d, dPredict, {width} = {}) {
           tickFormat: y2.tickFormat()
         }
       ), 
-      Plot.dot(d,
+      Plot.line(d,
         Plot.mapY((D) => D.map(y2),  
           {
             x: "yday", 
             y: "k", 
+            sort: "yday",
             stroke: "#46a351",  
             fy: "year",
             fx: "siteID",
@@ -310,7 +312,7 @@ export function deParamsPKTimeSeries(d, dPredict, {width} = {}) {
   });
 }
 
-export function deParamsTempTimeSeries(d, {width} = {}) {
+export function deParamsTempTimeSeries(d, dAvg, {width} = {}) {
   
   return Plot.plot({
     width,
@@ -318,19 +320,30 @@ export function deParamsTempTimeSeries(d, {width} = {}) {
     marginRight: 40,
     //color: {legend: true, label: "Day of year"},
     x: {label: "Day of year"},
-    y: {axis: "left", label: "Groundwater temperature (C)"},
+    y: {axis: "left", label: "Temperature (C)"},
     marks: [
       Plot.frame({stroke: "lightgrey"}),
-      Plot.dot(d,
+      Plot.line(dAvg,
+        {
+          x: "yday", 
+          y: "averageAirTemperature", 
+          stroke: "blue", 
+          fy: "year",
+          fx: "siteID",
+          tip: true
+        }
+      ),
+      Plot.line(d,
         {
           x: "yday", 
           y: "Tg", 
+          sort: "yday",
           stroke: "grey", 
           fy: "year",
           fx: "siteID",
           tip: true
         }
-      )
+      ),
       
     ]
   });
