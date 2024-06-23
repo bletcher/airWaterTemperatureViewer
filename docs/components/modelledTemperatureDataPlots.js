@@ -303,7 +303,7 @@ export function plotX1Y1(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
   const colorScale = Plot.scale({
     color: {
       type: "categorical",
-      domain: [...new Set(dIn.map(d => d.year))].sort(), //years,
+      domain: [...new Set(dXY.map(d => d.year))].sort(), //years,
       unknown: "var(--theme-foreground-muted)"
     }
   });

@@ -13,7 +13,7 @@ import { filterBySiteID_year_season, filterBySiteID_year } from "/components/raw
 
 ## Select sites and years
 
-<div class="grid grid-cols-4">
+<div class="grid grid-cols-3">
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
     ${selectSites}
   </div>
@@ -95,8 +95,8 @@ const selectedMaxTg = Generators.input(selectMaxTg);
 
 ## Plot raw data time series
 
-<div class="grid grid-cols-2"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+<div class="grid grid-cols-3"> 
+  <div style="display: flex; flex-direction: column; align-items: flex-start;" class="card">
     ${showWater}
     ${showAir}
     ${facetYearly}
@@ -138,8 +138,8 @@ dtMetricsFiltered
 dtMetricsFiltered
 ```
 
-## Parameter time series
-For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...`. Each parameter can be filtered by selecting the min/max values. The range sliders start with reasonable values, but the full range can be selected.  
+## Filter on parameters
+For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...` . The dataset for plotting below can be filtered by selecting the min/max parameter values. The range sliders start with reasonable values, but the full range can be selected.  
 The time series graphs will be updated to show only the data within the selected range.
 
 ```js
@@ -177,82 +177,59 @@ const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
   )
 ```
 
-### k
-
 ```js
 const kExtent = d3.extent(dtMetricsFiltered, d => d.k);
 const roundedKExtent = kExtent.map(value => Number(value.toFixed(2)));
 ```
-
-Extent of raw `k` = ${roundedKExtent[0]} to ${roundedKExtent[1]}
-
-
-<div class="grid grid-cols-2"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectMinK} ${selectMaxK}
-  </div>
-</div>
-
-```js
-Plot.plot({
-  color: {legend: true},
-  height: 200,
-  marks: [
-    Plot.rectY(
-      dtMetricsFiltered.filter(
-        d => d.k >= selectedMinK && d.k <= selectedMaxK
-      ), 
-  Plot.binX({y: "count"}, {x: "k"})),
-    Plot.ruleY([0])
-  ]
-})
-```
-
-### p
 
 ```js
 const pExtent = d3.extent(dtMetricsFiltered, d => d.p);
 const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
 ```
 
-Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
-
-<div class="grid grid-cols-2"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectMinP} ${selectMaxP}
-  </div>
+<div class="grid grid-cols-2">
+  <h2>k</h2><h2>p</h2>
 </div>
+<div class="grid grid-cols-2">
+  <div style="display: flex; flex-direction: column; align-items: flex-start;" class="card">
 
-```js
-Plot.plot({
-  color: {legend: true},
-  height: 200,
-  marks: [
-    Plot.rectY(
-      dtMetricsFiltered.filter(
-        d => d.p >= selectedMinP && d.p <= selectedMaxP
-      ), 
-  Plot.binX({y: "count"}, {x: "p"})),
-    Plot.ruleY([0])
-  ]
-})
-```
+  Extent of raw `k` = ${roundedKExtent[0]} to ${roundedKExtent[1]}
 
----
+  ${selectMinK} ${selectMaxK}
 
-```js
-//deParamsPKTimeSeries(
- // dtMetricsFilteredByParams
-//)
-```
+  ${Plot.plot({
+    color: {legend: true},
+    height: 300,
+    marks: [
+      Plot.rectY(
+        dtMetricsFiltered.filter(
+          d => d.k >= selectedMinK && d.k <= selectedMaxK
+        ),
+    Plot.binX({y: "count"}, {x: "k"})),
+      Plot.ruleY([0])
+    ]
+    })
+  }
+  </div>
+<div style="display: flex; flex-direction: column; align-items: flex-start;" class="card">
 
----
+  Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
 
-### Tg
+  ${selectMinP} ${selectMaxP}
 
-<div class="grid grid-cols-2"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectMinTg} ${selectMaxTg}
+  ${Plot.plot({
+    color: {legend: true},
+    height: 300,
+    marks: [
+      Plot.rectY(
+        dtMetricsFiltered.filter(
+          d => d.p >= selectedMinP && d.p <= selectedMaxP
+        ),
+    Plot.binX({y: "count"}, {x: "p"})),
+      Plot.ruleY([0])
+    ]
+    })
+  }
   </div>
 </div>
 
@@ -261,32 +238,37 @@ const TgExtent = d3.extent(dtMetricsFiltered, d => d.Tg);
 const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
 ```
 
-Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
+<div class="grid grid-cols-2">
+  <h2>Tg</h2>
+</div>
+<div class="grid grid-cols-2">
+  <div style="display: flex; flex-direction: column; align-items: flex-start;" class="card">
 
-```js
+  Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
 
-```
+  ${selectMinTg} ${selectMaxTg}
 
-```js
-Plot.plot({
-  color: {legend: true},
-  height: 200,
-  marks: [
-    Plot.rectY(
-      dtMetricsFiltered.filter(
-        d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
-      ), 
-  Plot.binX({y: "count"}, {x: "Tg"})),
-    Plot.ruleY([0])
-  ]
-})
-```
+  ${Plot.plot({
+    color: {legend: true},
+    height: 300,
+    marks: [
+      Plot.rectY(
+        dtMetricsFiltered.filter(
+          d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
+        ),
+    Plot.binX({y: "count"}, {x: "Tg"})),
+      Plot.ruleY([0])
+    ]
+    })
+  }
+  </div>
+</div>
 
 ---
 
 ### Time series graphs for `Tg` and `average daily air temperature`
 Predicted groundwater temperature in grey, observed air temperature in blue.  
-Need to add observend air and water temps to `dtMetricsFiltered`
+*Need to add observend air and water temps to `dtMetricsFiltered`* and then include in the dropdown below and get rid of this graph.
 
 ```js
 deParamsTempTimeSeries(
