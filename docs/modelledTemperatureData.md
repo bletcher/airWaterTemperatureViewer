@@ -96,7 +96,7 @@ const selectedMaxTg = Generators.input(selectMaxTg);
 ## Plot raw data time series
 
 <div class="grid grid-cols-3"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;" class="card">
+  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc;" class="card">
     ${showWater}
     ${showAir}
     ${facetYearly}
@@ -191,7 +191,7 @@ const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
   <h2>k</h2><h2>p</h2>
 </div>
 <div class="grid grid-cols-2">
-  <div style="display: flex; flex-direction: column; align-items: flex-start;" class="card">
+  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
 
   Extent of raw `k` = ${roundedKExtent[0]} to ${roundedKExtent[1]}
 
@@ -211,7 +211,7 @@ const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
     })
   }
   </div>
-<div style="display: flex; flex-direction: column; align-items: flex-start;" class="card">
+<div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f2f0ed" class="card">
 
   Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
 
@@ -242,7 +242,7 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
   <h2>Tg</h2>
 </div>
 <div class="grid grid-cols-2">
-  <div style="display: flex; flex-direction: column; align-items: flex-start;" class="card">
+  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
 
   Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
 
@@ -266,6 +266,51 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
 
 ---
 
+### Aggregation
+*to be added*  
+add dateTime to dtMetrics so we can  get  
+      month = month(DateTime_EST),  
+      week = week(DateTime_EST),  
+      hour = hour(DateTime_EST),  
+      yday = yday(DateTime_EST),
+
+```js
+//const aggregator = ["Annual", "Monthly", "Weekly", "Daily", "15 Minute"];
+const aggregator = ["year", "yday"];
+const selectAggregator = (Inputs.select(aggregator, {value: "Daily", multiple: false, width: 90, label: "Select aggregation level"}));
+const selectedAggregator = Generators.input(selectAggregator);
+```
+
+<div class="grid grid-cols-3"> 
+  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+    ${selectAggregator}
+  </div>
+</div>
+
+```js
+dtMetricsFilteredByParams
+```
+
+```js
+const groupedData = d3.group(dtMetricsFilteredByParams, d => d[selectedAggregator]);
+
+const dtMetricsFilteredByParamsAgg = Array.from(groupedData, ([key, values]) => ({
+  key,
+  ...paramList.reduce((acc, param) => {
+    acc[`mean${param.charAt(0).toUpperCase() + param.slice(1)}`] = d3.mean(values, d => d[param]);
+    return acc;
+  }, {})
+}));
+
+```
+
+```js
+dtMetricsFilteredByParamsAgg
+```
+
+
+---
+
 ### Time series graphs for `Tg` and `average daily air temperature`
 Predicted groundwater temperature in grey, observed air temperature in blue.  
 *Need to add observend air and water temps to `dtMetricsFiltered`* and then include in the dropdown below and get rid of this graph.
@@ -280,6 +325,7 @@ deParamsTempTimeSeries(
 ---
 
 ## Plot pairs of parameters over day of year
+*Could put these graphs next to each other*
 
 ```js
 const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 100, label: "Select if params are filtered as above"}));
@@ -289,20 +335,20 @@ const selectedParamFilter = Generators.input(selectParamFilter);
 ```js
 const modelList = ["sine", "de"];
 
-const selectParamModY1 = (Inputs.select(modelList, {value: [modelList[0]], width: 100, label: "Select model"}));
+const selectParamModY1 = (Inputs.select(modelList, {value: [modelList[0]], width: 60, label: "Select model"}));
 const selectedParamModY1 = Generators.input(selectParamModY1);
 
-const selectParamModY2 = (Inputs.select(modelList, {value: [modelList[0]], width: 100, label: "Select model"}));
+const selectParamModY2 = (Inputs.select(modelList, {value: [modelList[0]], width: 60, label: "Select model"}));
 const selectedParamModY2 = Generators.input(selectParamModY2);
 ```
 
 ```js
 const paramList = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio"];
 
-const selectParamY1 = (Inputs.select(paramList, {value: [paramList[5]], width: 100, label: "Select parameter"}));
+const selectParamY1 = (Inputs.select(paramList, {value: "amplitudeRatio", width: 125, label: "Select parameter"}));
 const selectedParamY1 = Generators.input(selectParamY1);
 
-const selectParamY2 = (Inputs.select(paramList, {value: [paramList[6]], width: 100, label: "Select parameter"}));
+const selectParamY2 = (Inputs.select(paramList, {value: "phaseLag", width: 120, label: "Select parameter"}));
 const selectedParamY2 = Generators.input(selectParamY2);
 ```
 
