@@ -332,6 +332,65 @@ export function plotX1Y1(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
 }
 
 
+
+export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {width} = {}) {
+  
+  const d1 = d.filter(d => d.model === y1Mod);
+  const d2 = d.filter(d => d.model === y2Mod);
+
+  // for 2nd y-axis
+  // https://observablehq.com/@observablehq/plot-dual-axis
+  const v1 = (d) => d[y1Var];
+  const v2 = (d) => d[y2Var];
+  const y2 = d3.scaleLinear(d3.extent(d2, v2), d3.extent(d1, v1));
+
+//console.log(yMod1, d3.extent(d2, v2), d3.extent(d1, v1));
+
+  return Plot.plot({
+    width,
+    marginTop: 30,
+    marginRight: 30,
+    //color: {legend: true, label: "Day of year"},
+    x: {label: "Day of year"},
+    y: {axis: "left", label: y1Var},
+    marks: [
+      Plot.frame({stroke: "lightgrey"}),
+      Plot.dot(d1,
+        {
+          x: "aggregator", 
+          y: y1Var, 
+          stroke: "grey", 
+          fy: selectedAggregator === "year" ? null : "year",
+          fx: "siteID",
+          tip: true
+        }
+      ),
+
+      Plot.axisY(y2.ticks(), 
+        {
+          color: "#870c10", 
+          anchor: "right", 
+          label: y2Var,
+          y: y2, 
+          tickFormat: y2.tickFormat()
+        }
+      ), 
+
+      Plot.dot(d2,
+        Plot.mapY((D) => D.map(y2),  
+          {
+            x: "aggregator", 
+            y: y2Var, 
+            stroke: "#870c10",  
+            fy: selectedAggregator === "year" ? null : "year",
+            fx: "siteID",
+            tip: true
+          }
+      ))
+    ]
+  });
+}
+
 export function plotY1Y2(d, y1Var, y2Var, y1Mod, y2Mod, {width} = {}) {
   
   const d1 = d.filter(d => d.model === y1Mod);

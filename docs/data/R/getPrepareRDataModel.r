@@ -69,8 +69,8 @@ dataIn_metrics <- df_metrics_de |>
     amplitudeWater = amplitude_water,
     amplitudeAir = amplitude_air
 
-    #airTemperature = Ta_bar,
-    #waterTemperature = Tw_bar
+    #airTemperature = Ta_obs,
+    #waterTemperature = Tw_obs
   )
 
 writeParquet(dataIn_metrics, path, dataName_metrics)

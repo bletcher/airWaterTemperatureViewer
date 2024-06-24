@@ -12,6 +12,7 @@ export default {
        pages: [
          //{name: "Temperature", path: "/temperatureData"},
         // {name: "Temperature - parquet", path: "/temperatureDataParquet"},
+         {name: "Introduction", path: "/introduction"},
          {name: "Raw Temperature", path: "/rawTemperatureData"},
          {name: "Modelled Temperature", path: "/modelledTemperatureData"},
          //{name: "Flow and temperature", path: "/temperatureFlowData"}

@@ -1,5 +1,5 @@
 ```js
-import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotX1Y1, plotPhaseAmpXY, deParamsPKTimeSeries, deParamsTempTimeSeries } from "./components/modelledTemperatureDataPlots.js";
+import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotY1Y2Agg, plotX1Y1, plotPhaseAmpXY, deParamsPKTimeSeries, deParamsTempTimeSeries } from "./components/modelledTemperatureDataPlots.js";
 //import {interval} from 'https://observablehq.com/@mootari/range-slider';
 import * as d3 from "npm:d3";
 ```
@@ -106,6 +106,8 @@ const selectedMaxTg = Generators.input(selectMaxTg);
 Mouse over the time series chart below to see the hourly chart for the chosen site, year, and day of year.  
 In the sub-daily graph, water temperature is in site-specific color and air temperature is grey. Predictions are the smooth lines.
 
+** make the pop-up responsive to showAir and showWater **
+
 ```js
 const timeSeriesHover = view(plotTimeSeries(dtPredictFiltered, groupSiteID, selectedShowWater, selectedShowAir, selectedFacetYearly));
 ```
@@ -140,8 +142,10 @@ dtMetricsFiltered
 
 ## Filter on parameters
 For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...` . The dataset for plotting below can be filtered by selecting the min/max parameter values. The range sliders start with reasonable values, but the full range can be selected.  
-The time series graphs will be updated to show only the data within the selected range.
+The *time series graphs* will be updated to show only the data within the selected range.
 
+
+*could have just one panel with a dropdown to select the param for filtering and save the range*
 ```js
 const dtPredictGrouped = d3.groups(
   dtPredictFiltered, 
@@ -193,7 +197,8 @@ const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
 <div class="grid grid-cols-2">
   <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
 
-  Extent of raw `k` = ${roundedKExtent[0]} to ${roundedKExtent[1]}
+  **Extent of raw `k` = ${roundedKExtent[0]} to ${roundedKExtent[1]} for model `sine`  
+  Extent of raw `k` = ${roundedKExtent[0]} to ${roundedKExtent[1]} for model `de`**
 
   ${selectMinK} ${selectMaxK}
 
@@ -205,7 +210,7 @@ const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
         dtMetricsFiltered.filter(
           d => d.k >= selectedMinK && d.k <= selectedMaxK
         ),
-    Plot.binX({y: "count"}, {x: "k"})),
+    Plot.binX({y: "count"}, {x: "k", fill: "model"})),
       Plot.ruleY([0])
     ]
     })
@@ -225,7 +230,7 @@ const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
         dtMetricsFiltered.filter(
           d => d.p >= selectedMinP && d.p <= selectedMaxP
         ),
-    Plot.binX({y: "count"}, {x: "p"})),
+    Plot.binX({y: "count"}, {x: "p", fill: "model"})),
       Plot.ruleY([0])
     ]
     })
@@ -256,7 +261,7 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
         dtMetricsFiltered.filter(
           d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
         ),
-    Plot.binX({y: "count"}, {x: "Tg"})),
+    Plot.binX({y: "count"}, {x: "Tg", fill: "model"})),
       Plot.ruleY([0])
     ]
     })
@@ -264,19 +269,21 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
   </div>
 </div>
 
+*add r2 panel*
+
 ---
 
 ### Aggregation
 *to be added*  
 add dateTime to dtMetrics so we can  get  
+season   
       month = month(DateTime_EST),  
-      week = week(DateTime_EST),  
-      hour = hour(DateTime_EST),  
+      week = week(DateTime_EST),   
       yday = yday(DateTime_EST),
 
 ```js
 //const aggregator = ["Annual", "Monthly", "Weekly", "Daily", "15 Minute"];
-const aggregator = ["year", "yday"];
+const aggregator = ["year", "season", "month", "week", "yday"];
 const selectAggregator = (Inputs.select(aggregator, {value: "Daily", multiple: false, width: 90, label: "Select aggregation level"}));
 const selectedAggregator = Generators.input(selectAggregator);
 ```
@@ -287,48 +294,40 @@ const selectedAggregator = Generators.input(selectAggregator);
   </div>
 </div>
 
-```js
-dtMetricsFilteredByParams
+ ```js
+const groupedData = d3.group(dtMetricsFilteredByParams, d => d.siteID, d => d.year, d => d.model, d => d[selectedAggregator]);
+
+// Calculate the mean for each parameter in each group
+const dtMetricsFilteredByParamsAgg = Array.from(groupedData, ([siteID, years]) =>
+  Array.from(years, ([year, models]) =>
+    Array.from(models, ([model, aggregators]) =>
+      Array.from(aggregators, ([aggregator, values]) => ({
+        siteID,
+        year,
+        model,
+        aggregator,
+        ...paramList.reduce((acc, param) => {
+          acc[param] = d3.mean(values, d => d[param]);
+          return acc;
+        }, {})
+      }))
+    )
+  )
+).flat(3); // Adjusted flat depth to account for the added level of grouping
 ```
 
 ```js
-const groupedData = d3.group(dtMetricsFilteredByParams, d => d[selectedAggregator]);
-
-const dtMetricsFilteredByParamsAgg = Array.from(groupedData, ([key, values]) => ({
-  key,
-  ...paramList.reduce((acc, param) => {
-    acc[`mean${param.charAt(0).toUpperCase() + param.slice(1)}`] = d3.mean(values, d => d[param]);
-    return acc;
-  }, {})
-}));
-
-```
-
-```js
-dtMetricsFilteredByParamsAgg
-```
-
-
----
-
-### Time series graphs for `Tg` and `average daily air temperature`
-Predicted groundwater temperature in grey, observed air temperature in blue.  
-*Need to add observend air and water temps to `dtMetricsFiltered`* and then include in the dropdown below and get rid of this graph.
-
-```js
-deParamsTempTimeSeries(
-  dtMetricsFilteredByParams,
-  airTemperatureAverages
-)
+display(dtMetricsFilteredByParamsAgg)
 ```
 
 ---
 
 ## Plot pairs of parameters over day of year
 *Could put these graphs next to each other*
+*conditionally show last 4 when model = sine*
 
 ```js
-const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 100, label: "Select if params are filtered as above"}));
+const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 100, label: "Show filtered data?"}));
 const selectedParamFilter = Generators.input(selectParamFilter);
 ```
 
@@ -343,7 +342,9 @@ const selectedParamModY2 = Generators.input(selectParamModY2);
 ```
 
 ```js
-const paramList = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio"];
+const paramList = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio", "phaseAir", "phaseWater", "amplitudeAir", "amplitudeWater"];
+
+
 
 const selectParamY1 = (Inputs.select(paramList, {value: "amplitudeRatio", width: 125, label: "Select parameter"}));
 const selectedParamY1 = Generators.input(selectParamY1);
@@ -370,6 +371,17 @@ const selectedParamY2 = Generators.input(selectParamY2);
 </div>
 
 ```js
+plotY1Y2Agg(
+  selectedParamFilter ? dtMetricsFilteredByParamsAgg : dtMetricsFiltered, 
+  selectedParamY1, 
+  selectedParamY2, 
+  selectedParamModY1, 
+  selectedParamModY2,
+  selectedAggregator
+)
+```
+
+```js
 plotY1Y2(
   selectedParamFilter ? dtMetricsFilteredByParams : dtMetricsFiltered, 
   selectedParamY1, 
@@ -392,3 +404,5 @@ plotX1Y1(
   selectedParamModY2
 )
 ```
+
+*add map with time slider for the filtered, aggregated data*
