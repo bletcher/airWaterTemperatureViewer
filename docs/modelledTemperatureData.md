@@ -1,5 +1,5 @@
 ```js
-import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotY1Y2Agg, plotX1Y1 } from "./components/modelledTemperatureDataPlots.js";
+import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotY1Y2Agg, plotX1Y1Agg } from "./components/modelledTemperatureDataPlots.js";
 //import {interval} from 'https://observablehq.com/@mootari/range-slider';
 import * as d3 from "npm:d3";
 ```
@@ -291,6 +291,13 @@ const dtMetricsFilteredByParamsAgg = groupAndAggregate(
   selectedAggregator,
   'siteID', 'year', 'model',  // Default grouping variables
 );
+
+const dtMetricsFilteredAgg = groupAndAggregate(
+  dtMetricsFiltered, // Dataset
+  paramListSine, // Parameters to aggregate
+  selectedAggregator,
+  'siteID', 'year', 'model',  // Default grouping variables
+);
 ```
 
 dtMetricsFilteredByParamsAgg
@@ -349,7 +356,7 @@ const selectedParamY2 = Generators.input(selectParamY2);
 
 ```js
 plotY1Y2Agg(
-  selectedParamFilter ? dtMetricsFilteredByParamsAgg : dtMetricsFiltered, 
+  selectedParamFilter ? dtMetricsFilteredByParamsAgg : dtMetricsFilteredAgg, 
   selectedParamY1, 
   selectedParamY2, 
   selectedParamModY1, 
@@ -374,8 +381,8 @@ plotY1Y2(
 ## Plot the pairs of parameters against each other
 
 ```js
-plotX1Y1(  
-  selectedParamFilter ? dtMetricsFilteredByParams : dtMetricsFiltered,  
+plotX1Y1Agg(  
+  selectedParamFilter ? dtMetricsFilteredByParamsAgg : dtMetricsFilteredAgg,  
   selectedParamY1, 
   selectedParamY2, 
   selectedParamModY1, 

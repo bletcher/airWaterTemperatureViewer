@@ -278,6 +278,76 @@ export function plotX1Y1(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
   });
 }
 
+function joinModelDataAgg(dIn, xVar, yVar, xMod, yMod) {
+  // Step 1: Correctly Filter Data by Model
+  const xModData = dIn.filter(d => d.model === xMod);
+  const yModData = dIn.filter(d => d.model === yMod);
+
+  // Step 2: Extract Unique Combinations (assuming unique in context of model)
+  const uniqueCombinations = new Set();
+  dIn.forEach(d => {
+    const combo = `${d.siteID}-${d.year}-${d.selectedAggregatorValue}`;
+    uniqueCombinations.add(combo);
+  });
+
+  // Step 3: Join Data
+  const joinedData = [];
+  uniqueCombinations.forEach(combo => {
+    const [siteID, year, selectedAggregatorValue] = combo.split('-');
+    const xRecord = xModData.find(d => d.siteID === siteID && d.year == year && d.selectedAggregatorValue == selectedAggregatorValue);
+    const yRecord = yModData.find(d => d.siteID === siteID && d.year == year && d.selectedAggregatorValue == selectedAggregatorValue);
+
+    if (xRecord && yRecord) {
+      joinedData.push({
+        siteID: siteID,
+        year: year,
+        selectedAggregatorValue: selectedAggregatorValue,
+        x: xRecord[xVar], 
+        y: yRecord[yVar]  
+      });
+    }
+  });
+
+  return joinedData;
+}
+
+export function plotX1Y1Agg(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
+
+  const dXY = joinModelDataAgg(dIn, xVar, yVar, xMod, yMod);
+
+  console.log(dIn, dXY)
+
+  const colorScale = Plot.scale({
+    color: {
+      type: "categorical",
+      domain: [...new Set(dXY.map(d => d.year))].sort(), //years,
+      unknown: "var(--theme-foreground-muted)"
+    }
+  });
+
+  return Plot.plot({
+    width,
+    marginTop: 30,
+    marginRight: 70,
+    color: {...colorScale, legend: true},
+    x: {label: xVar},
+    y: {axis: "left", label: yVar},
+    marks: [
+      Plot.frame({stroke: "lightgrey"}),
+      Plot.dot(dXY,
+        {
+          x: "x", 
+          y: "y", 
+          stroke: "year", 
+          //fx: "model",
+          fy: "siteID",
+          tip: true
+        }
+      )
+    ]
+  });
+}
+
 
 
 export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {width} = {}) {
