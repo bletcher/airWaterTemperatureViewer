@@ -1,11 +1,11 @@
 ```js
-import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotY1Y2Agg, plotX1Y1, plotPhaseAmpXY, deParamsPKTimeSeries, deParamsTempTimeSeries } from "./components/modelledTemperatureDataPlots.js";
+import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotY1Y2Agg, plotX1Y1 } from "./components/modelledTemperatureDataPlots.js";
 //import {interval} from 'https://observablehq.com/@mootari/range-slider';
 import * as d3 from "npm:d3";
 ```
 
 ```js
-import { df_metrics_SR, df_predict_SR } from "./components/modelledTemperatureVariables.js";
+import { df_metrics_SR, df_predict_SR, groupAndAggregate } from "./components/modelledTemperatureVariables.js";
 import { filterBySiteID_year_season, filterBySiteID_year } from "/components/rawTemperatureVariables.js";
 
 
@@ -72,22 +72,22 @@ const selectedSeasons = Generators.input(selectSeasons);
 
 ```js
 //// min/max selectors for k, p, Tg
-const selectMinP = (Inputs.range([pExtent[0].toFixed(0), 0], {value: 0, step: 0.01, width: 220, label: "Select minimum `p`"}));
+const selectMinP = (Inputs.range([pExtent[0].toFixed(0), 0], {value: 0, step: 0.01, width: 300, label: "Select minimum `p`"}));
 const selectedMinP = Generators.input(selectMinP);
 
-const selectMaxP = (Inputs.range([0, pExtent[1]], {value: 1, step: 0.01, width: 220, label: "Select maximum `p`"}));
+const selectMaxP = (Inputs.range([0, pExtent[1]], {value: 1, step: 0.01, width: 300, label: "Select maximum `p`"}));
 const selectedMaxP = Generators.input(selectMaxP);
 
-const selectMinK = (Inputs.range([kExtent[0].toFixed(0), 0], {value: -50, step: 1, width: 220, label: "Select minimum `k`"}));
+const selectMinK = (Inputs.range([kExtentSine[0].toFixed(0), 0], {value: -50, step: 1, width: 300, label: "Select min `k` - sine"}));
 const selectedMinK = Generators.input(selectMinK);
 
-const selectMaxK = (Inputs.range([0, kExtent[1]], {value: 100, step: 1, width: 220, label: "Select maximum `k`", transform: Math.log}));
+const selectMaxK = (Inputs.range([0, kExtentSine[1]], {value: 100, step: 1, width: 300, label: "Select max `k`  - sine", transform: Math.log}));
 const selectedMaxK = Generators.input(selectMaxK);
 
-const selectMinTg = (Inputs.range([TgExtent[0].toFixed(0), 0], {value: -3, step: 0.1, width: 220, label: "Select minimum `Tg`"}));
+const selectMinTg = (Inputs.range([TgExtent[0].toFixed(0), 0], {value: -3, step: 0.1, width: 300, label: "Select minimum `Tg`"}));
 const selectedMinTg = Generators.input(selectMinTg);
 
-const selectMaxTg = (Inputs.range([0, TgExtent[1]], {value: 22, step: 0.1, width: 220, label: "Select maximum `Tg`", transform: Math.log}));
+const selectMaxTg = (Inputs.range([0, TgExtent[1]], {value: 22, step: 0.1, width: 300, label: "Select maximum `Tg`", transform: Math.log}));
 const selectedMaxTg = Generators.input(selectMaxTg);
 ```
 
@@ -105,8 +105,6 @@ const selectedMaxTg = Generators.input(selectMaxTg);
 
 Mouse over the time series chart below to see the hourly chart for the chosen site, year, and day of year.  
 In the sub-daily graph, water temperature is in site-specific color and air temperature is grey. Predictions are the smooth lines.
-
-** make the pop-up responsive to showAir and showWater **
 
 ```js
 const timeSeriesHover = view(plotTimeSeries(dtPredictFiltered, groupSiteID, selectedShowWater, selectedShowAir, selectedFacetYearly));
@@ -128,7 +126,6 @@ const dtMetricsHovered = timeSeriesHover === null ?
 plotCurveHover(dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID)
 ```
 In the graph above, the curve it for the sine model is the solid line and for the differential equation model (`de`) the lide is dashed. There is no `de` model for the air temperature.  
-*Need to fix r2s. Check on values and add for air*
 
 ---
 
@@ -142,32 +139,11 @@ dtMetricsFiltered
 
 ## Filter on parameters
 For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...` . The dataset for plotting below can be filtered by selecting the min/max parameter values. The range sliders start with reasonable values, but the full range can be selected.  
-The *time series graphs* will be updated to show only the data within the selected range.
+The *time series graphs* are updated to show only the data within the selected range.
 
 
 *could have just one panel with a dropdown to select the param for filtering and save the range*
-```js
-const dtPredictGrouped = d3.groups(
-  dtPredictFiltered, 
-  d => d.siteID,
-  d => d.year,
-  d => d.yday
-  );
 
-const airTemperatureAverages = dtPredictGrouped.flatMap(([siteID, yearGroups]) => 
-  yearGroups.flatMap(([year, ydayGroups]) => 
-    ydayGroups.map(([yday, values]) => {
-      const averageAirTemperature = d3.mean(values, d => d.airTemperature);
-      return {siteID, year, yday, averageAirTemperature};
-    })
-  )
-);
-
-```
-
-```js
-//airTemperatureAverages
-```
 
 ```js
 const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
@@ -182,8 +158,11 @@ const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
 ```
 
 ```js
-const kExtent = d3.extent(dtMetricsFiltered, d => d.k);
-const roundedKExtent = kExtent.map(value => Number(value.toFixed(2)));
+const kExtentSine = d3.extent(dtMetricsFiltered.filter(d => d.model === "sine"), d => d.k);
+const roundedKExtentSine = kExtentSine.map(d => Number(d.toFixed(2)));
+
+const kExtentDe = d3.extent(dtMetricsFiltered.filter(d => d.model === "de"), d => d.k);
+const roundedKExtentDe = kExtentDe.map(d => Number(d.toFixed(2)));
 ```
 
 ```js
@@ -191,16 +170,24 @@ const pExtent = d3.extent(dtMetricsFiltered, d => d.p);
 const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
 ```
 
+```js
+const TgExtent = d3.extent(dtMetricsFiltered, d => d.Tg);
+const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
+```
+
+
 <div class="grid grid-cols-2">
   <h2>k</h2><h2>p</h2>
 </div>
 <div class="grid grid-cols-2">
   <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
 
-  **Extent of raw `k` = ${roundedKExtent[0]} to ${roundedKExtent[1]} for model `sine`  
-  Extent of raw `k` = ${roundedKExtent[0]} to ${roundedKExtent[1]} for model `de`**
+  Extent of raw `k` = ${roundedKExtentSine[0]} to ${roundedKExtentSine[1]} for model `sine`  
+  Extent of raw `k` = ${roundedKExtentDe[0]} to ${roundedKExtentDe[1]} for model `de`
 
-  ${selectMinK} ${selectMaxK}
+  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+    ${selectMinK} ${selectMaxK}
+  </div>
 
   ${Plot.plot({
     color: {legend: true},
@@ -220,7 +207,9 @@ const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
 
   Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
 
-  ${selectMinP} ${selectMaxP}
+  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+    ${selectMinP} ${selectMaxP}
+  </div>
 
   ${Plot.plot({
     color: {legend: true},
@@ -238,11 +227,6 @@ const roundedPExtent = pExtent.map(value => Number(value.toFixed(2)));
   </div>
 </div>
 
-```js
-const TgExtent = d3.extent(dtMetricsFiltered, d => d.Tg);
-const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
-```
-
 <div class="grid grid-cols-2">
   <h2>Tg</h2>
 </div>
@@ -251,8 +235,10 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
 
   Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
 
-  ${selectMinTg} ${selectMaxTg}
-
+  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+    ${selectMinTg} ${selectMaxTg}
+  </div>
+  
   ${Plot.plot({
     color: {legend: true},
     height: 300,
@@ -278,13 +264,17 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
 add dateTime to dtMetrics so we can  get  
 season   
       month = month(DateTime_EST),  
-      week = week(DateTime_EST),   
-      yday = yday(DateTime_EST),
+      week = week(DateTime_EST)  
 
 ```js
-//const aggregator = ["Annual", "Monthly", "Weekly", "Daily", "15 Minute"];
-const aggregator = ["year", "season", "month", "week", "yday"];
-const selectAggregator = (Inputs.select(aggregator, {value: "Daily", multiple: false, width: 90, label: "Select aggregation level"}));
+const aggregator = new Map([
+  ["Year", "year"],
+  ["Season", "season"],
+  ["Month", "month"],
+  ["Week", "week"],
+  ["Day of year", "yday"]
+]);
+const selectAggregator = (Inputs.select(aggregator, {value: "yday", multiple: false, width: 110, label: "Select aggregation level"}));
 const selectedAggregator = Generators.input(selectAggregator);
 ```
 
@@ -294,28 +284,16 @@ const selectedAggregator = Generators.input(selectAggregator);
   </div>
 </div>
 
- ```js
-const groupedData = d3.group(dtMetricsFilteredByParams, d => d.siteID, d => d.year, d => d.model, d => d[selectedAggregator]);
-
-// Calculate the mean for each parameter in each group
-const dtMetricsFilteredByParamsAgg = Array.from(groupedData, ([siteID, years]) =>
-  Array.from(years, ([year, models]) =>
-    Array.from(models, ([model, aggregators]) =>
-      Array.from(aggregators, ([aggregator, values]) => ({
-        siteID,
-        year,
-        model,
-        aggregator,
-        ...paramList.reduce((acc, param) => {
-          acc[param] = d3.mean(values, d => d[param]);
-          return acc;
-        }, {})
-      }))
-    )
-  )
-).flat(3); // Adjusted flat depth to account for the added level of grouping
+```js
+const dtMetricsFilteredByParamsAgg = groupAndAggregate(
+  dtMetricsFilteredByParams, // Dataset
+  paramListSine, // Parameters to aggregate
+  selectedAggregator,
+  'siteID', 'year', 'model',  // Default grouping variables
+);
 ```
 
+dtMetricsFilteredByParamsAgg
 ```js
 display(dtMetricsFilteredByParamsAgg)
 ```
@@ -324,7 +302,6 @@ display(dtMetricsFilteredByParamsAgg)
 
 ## Plot pairs of parameters over day of year
 *Could put these graphs next to each other*
-*conditionally show last 4 when model = sine*
 
 ```js
 const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 100, label: "Show filtered data?"}));
@@ -342,14 +319,14 @@ const selectedParamModY2 = Generators.input(selectParamModY2);
 ```
 
 ```js
-const paramList = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio", "phaseAir", "phaseWater", "amplitudeAir", "amplitudeWater"];
+const paramListDe = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio"];
+const paramListSine = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio", "phaseAir", "phaseWater", "amplitudeAir", "amplitudeWater"];
 
 
-
-const selectParamY1 = (Inputs.select(paramList, {value: "amplitudeRatio", width: 125, label: "Select parameter"}));
+const selectParamY1 = (Inputs.select(selectedParamModY1 === "sine" ? paramListSine : paramListDe, {value: "amplitudeRatio", width: 125, label: "Select parameter"}));
 const selectedParamY1 = Generators.input(selectParamY1);
 
-const selectParamY2 = (Inputs.select(paramList, {value: "phaseLag", width: 120, label: "Select parameter"}));
+const selectParamY2 = (Inputs.select(selectedParamModY2 === "sine" ? paramListSine : paramListDe, {value: "phaseLag", width: 120, label: "Select parameter"}));
 const selectedParamY2 = Generators.input(selectParamY2);
 ```
 
@@ -382,13 +359,14 @@ plotY1Y2Agg(
 ```
 
 ```js
+/*
 plotY1Y2(
   selectedParamFilter ? dtMetricsFilteredByParams : dtMetricsFiltered, 
   selectedParamY1, 
   selectedParamY2, 
   selectedParamModY1, 
   selectedParamModY2
-)
+) */
 ```
 
 ---
@@ -404,5 +382,7 @@ plotX1Y1(
   selectedParamModY2
 )
 ```
+
+---
 
 *add map with time slider for the filtered, aggregated data*

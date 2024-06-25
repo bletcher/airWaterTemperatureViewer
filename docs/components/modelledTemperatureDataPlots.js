@@ -35,7 +35,7 @@ export function plotTimeSeries(d, groupSiteID, showWater, showAir, selectedFacet
           stroke: "grey", 
           fy: selectedFacetYearly ? "year" : "null",
           fx: "siteID",
-          tip: true
+          tip: showAir ? true : false
         }
       ),
         Plot.line(d, 
@@ -45,7 +45,8 @@ export function plotTimeSeries(d, groupSiteID, showWater, showAir, selectedFacet
             y: showWater ? "waterTemperature" : "null", 
             stroke: "siteID", 
             fy: selectedFacetYearly ? "year" : "null",
-            fx: "siteID"
+            fx: "siteID",
+            tip: showWater && showAir ? false : true
           }
         )
     ]
@@ -169,61 +170,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
   }
 }
 
-export function plotPhaseAmp(d, {width} = {}) {
-  
-  // for 2nd y-axis
-  // https://observablehq.com/@observablehq/plot-dual-axis
-  const v1 = (d) => d.amplitudeRatio;
-  const v2 = (d) => d.phaseLag;
-  const y2 = d3.scaleLinear(d3.extent(d, v2), d3.extent(d, v1));
-  //const y2 = d3.scaleLinear(d3.extent(d, v2), [0, d3.max(d, v1)]);
-
-  return Plot.plot({
-    width,
-    marginTop: 30,
-    marginRight: 30,
-    //color: {legend: true, label: "Day of year"},
-    x: {label: "Day of year"},
-    y: {axis: "left", label: "Amplitude"},
-    marks: [
-      Plot.frame({stroke: "lightgrey"}),
-      Plot.dot(d,
-        {
-          x: "yday", 
-          y: "amplitudeRatio", 
-          stroke: "grey", 
-          fy: "year",
-          fx: "siteID",
-          tip: true
-        }
-      ),
-
-      Plot.axisY(y2.ticks(), 
-        {
-          color: "#870c10", 
-          anchor: "right", 
-          label: "Phase difference",
-          y: y2, 
-          tickFormat: y2.tickFormat()
-        }
-      ), 
-
-      Plot.dot(d,
-        Plot.mapY((D) => D.map(y2),  
-          {
-            x: "yday", 
-            y: "phaseLag", 
-            stroke: "#870c10",  
-            fy: "year",
-            fx: "siteID",
-            tip: true
-          }
-      ))
-    ]
-  });
-}
-
-export function plotPhaseAmpXY(d, years, {width} = {}) {
+function plotPhaseAmpXY(d, years, {width} = {}) {
   
   const colorScale = Plot.scale({
     color: {
@@ -357,7 +304,7 @@ export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {
       Plot.frame({stroke: "lightgrey"}),
       Plot.dot(d1,
         {
-          x: "aggregator", 
+          x: "selectedAggregatorValue", 
           y: y1Var, 
           stroke: "grey", 
           fy: selectedAggregator === "year" ? null : "year",
@@ -379,7 +326,7 @@ export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {
       Plot.dot(d2,
         Plot.mapY((D) => D.map(y2),  
           {
-            x: "aggregator", 
+            x: "selectedAggregatorValue", 
             y: y2Var, 
             stroke: "#870c10",  
             fy: selectedAggregator === "year" ? null : "year",
@@ -391,7 +338,7 @@ export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {
   });
 }
 
-export function plotY1Y2(d, y1Var, y2Var, y1Mod, y2Mod, {width} = {}) {
+function plotY1Y2(d, y1Var, y2Var, y1Mod, y2Mod, {width} = {}) {
   
   const d1 = d.filter(d => d.model === y1Mod);
   const d2 = d.filter(d => d.model === y2Mod);
@@ -445,99 +392,6 @@ export function plotY1Y2(d, y1Var, y2Var, y1Mod, y2Mod, {width} = {}) {
             tip: true
           }
       ))
-    ]
-  });
-}
-
-export function deParamsPKTimeSeries(d, {width} = {}) {
-  
-  // for 2nd y-axis
-  // https://observablehq.com/@observablehq/plot-dual-axis
-  const v1 = (d) => d.p;
-  const v2 = (d) => d.k;
-  const y2 = d3.scaleLinear(d3.extent(d, v2), d3.extent(d, v1));
-  //const y2 = d3.scaleLinear(d3.extent(d, v2), [0, d3.max(d, v1)]);
-
-  return Plot.plot({
-    width,
-    marginTop: 30,
-    marginRight: 40,
-    //color: {legend: true, label: "Day of year"},
-    x: {label: "Day of year"},
-    y: {axis: "left", label: "Proportion groundwater"},
-    marks: [
-      Plot.frame({stroke: "lightgrey"}),
-      Plot.line(d,
-        {
-          x: "yday", 
-          y: "p", 
-          sort: "yday",
-          stroke: "red", 
-          fy: "year",
-          fx: "siteID",
-          tip: true
-        }
-      ),
-      
-      // 2nd y-axis
-      Plot.axisY(y2.ticks(), 
-        {
-          color: "#46a351", 
-          anchor: "right", 
-          label: "k",
-          y: y2, 
-          tickFormat: y2.tickFormat()
-        }
-      ), 
-      Plot.line(d,
-        Plot.mapY((D) => D.map(y2),  
-          {
-            x: "yday", 
-            y: "k", 
-            sort: "yday",
-            stroke: "#46a351",  
-            fy: "year",
-            fx: "siteID",
-            tip: true
-          }
-      ))
-    ]
-  });
-}
-
-export function deParamsTempTimeSeries(d, dAvg, {width} = {}) {
-  
-  return Plot.plot({
-    width,
-    marginTop: 30,
-    marginRight: 40,
-    //color: {legend: true, label: "Day of year"},
-    x: {label: "Day of year"},
-    y: {axis: "left", label: "Temperature (C)"},
-    marks: [
-      Plot.frame({stroke: "lightgrey"}),
-      Plot.line(dAvg,
-        {
-          x: "yday", 
-          y: "averageAirTemperature", 
-          stroke: "blue", 
-          fy: "year",
-          fx: "siteID",
-          tip: true
-        }
-      ),
-      Plot.line(d,
-        {
-          x: "yday", 
-          y: "Tg", 
-          sort: "yday",
-          stroke: "grey", 
-          fy: "year",
-          fx: "siteID",
-          tip: true
-        }
-      ),
-      
     ]
   });
 }
