@@ -32,17 +32,6 @@ const dtPredictFiltered = filterBySiteID_year(dtPredict, selectedSites, selected
 const dtMetricsFiltered = filterBySiteID_year(dtMetrics, selectedSites, selectedYears);
 ```
 
-dtPredictFiltered
-```js
-dtPredictFiltered
-```
-
-dtMetricsFiltered
-```js
-dtMetricsFiltered
-```
-
-
 ```js
 const groupSiteID = [...new Set(dtPredict.map(d => d.siteID))].sort() // for the colorScale
 
@@ -129,21 +118,9 @@ In the graph above, the curve it for the sine model is the solid line and for th
 
 ---
 
-```js
-```
-
-dtMetricsFiltered
-```js
-dtMetricsFiltered
-```
-
 ## Filter on parameters
 For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...` . The dataset for plotting below can be filtered by selecting the min/max parameter values. The range sliders start with reasonable values, but the full range can be selected.  
 The *time series graphs* are updated to show only the data within the selected range.
-
-
-*could have just one panel with a dropdown to select the param for filtering and save the range*
-
 
 ```js
 const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
@@ -259,17 +236,12 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
 
 ---
 
-### Aggregation
-*to be added*  
-add dateTime to dtMetrics so we can  get  
-season   
-      month = month(DateTime_EST),  
-      week = week(DateTime_EST)  
+## Aggregation
 
 ```js
 const aggregator = new Map([
   ["Year", "year"],
-  ["Season", "season"],
+  ["Season", "seasonInt"],
   ["Month", "month"],
   ["Week", "week"],
   ["Day of year", "yday"]
@@ -301,11 +273,6 @@ const dtMetricsFilteredAgg = groupAndAggregate(
   d3.mean, //aggregation function
   'siteID', 'year', 'model',  // Default grouping variables
 );
-```
-
-dtMetricsFilteredByParamsAgg
-```js
-display(dtMetricsFilteredByParamsAgg)
 ```
 
 ---
@@ -533,6 +500,8 @@ const colorScale = d3.scaleLinear()
 const markersLayer = L.layerGroup().addTo(mapMod);
 ```
 
+First variable is color, second is radius.
+
 ```js
 //////////////////////////////////////////////
 function updateMarkersMapMod() {
@@ -542,6 +511,7 @@ function updateMarkersMapMod() {
     //display(["0", site.siteID, markerDataVar1.filter(d => d.siteID === site.siteID)])
     if (selectedSites.includes(site.siteID)) {
       const siteIDDataAll = allDataAggExtent.filter(d => d.siteID === site.siteID);
+      
       const min1 = siteIDDataAll[0][selectedParamY1][0];
       const max1 = siteIDDataAll[0][selectedParamY1][1];
 
@@ -554,9 +524,13 @@ function updateMarkersMapMod() {
   //display(["1",site.siteID, siteIDData1, mean1, normVar1, siteIDDataAll, allDataAggExtent])
 
       const siteIDData2 = markerDataVar2.filter(d => d.siteID === site.siteID);
+      const min2 = siteIDDataAll[0][selectedParamY2][0];
+      const max2 = siteIDDataAll[0][selectedParamY2][1];
+
       const mean2 = siteIDData2.filter(d => d.stat === "mean")[0][selectedParamY2];
 
-      const radius = Math.abs(mean2) * 4; // Scale the radius
+      const normVar2 = (mean2 - min2) / (max2 - min2);
+      const radius = (normVar2 + 1) * 7; // Scale the radius
 
   //display(["2",site.siteID, siteIDData2, radius])
 
@@ -568,8 +542,8 @@ function updateMarkersMapMod() {
       });
 
       markersLayer.addLayer(marker);
-
-      marker.bindPopup(`Site ID: ${site.siteID} <br> ${selectedParamY1}: ${mean1.toFixed(2)} <br> ${selectedParamY2}: ${Math.abs(mean2).toFixed(2)}`);
+display([mean1.toFixed(2), normVar1.toFixed(2), selectedParamY2, mean2.toFixed(2), normVar2.toFixed(2)])
+      marker.bindPopup(`Site ID: ${site.siteID} <br> ${selectedParamY1}: ${mean1.toFixed(2)} (${normVar1.toFixed(2)}) <br> ${selectedParamY2}: ${mean2.toFixed(2)} (${normVar2.toFixed(2)})`);
       marker.on('mouseover', function (e) {
         this.openPopup();
       });

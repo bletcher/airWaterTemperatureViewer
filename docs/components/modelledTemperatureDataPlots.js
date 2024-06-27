@@ -368,7 +368,7 @@ export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {
     marginTop: 30,
     marginRight: 30,
     //color: {legend: true, label: "Day of year"},
-    x: {label: "Day of year"},
+    x: {label: selectedAggregator},
     y: {axis: "left", label: y1Var},
     marks: [
       Plot.frame({stroke: "lightgrey"}),

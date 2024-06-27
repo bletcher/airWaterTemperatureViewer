@@ -37,7 +37,7 @@ writeParquet <- function(dataIn, pathIn, dataNameIn) {
 # Get raw data
 # This loads "df_metrics_de"   "df_metrics_sine"
 # "df_predict_de"   "df_predict_sine"
-load("./docs/data/dataIn/EcoDrought-sites_calcs_SR_20Jun2024.RData")
+load("./docs/data/dataIn/EcoDrought-sites_calcs_SR_26Jun2024.RData")
 
 str(df_predict_de)
 path <- "./docs/data/parquet/shen/tim/"
@@ -67,10 +67,29 @@ dataIn_metrics <- df_metrics_de |>
     phaseWater = phase_water,
     phaseAir = phase_air,
     amplitudeWater = amplitude_water,
-    amplitudeAir = amplitude_air
-
-    #airTemperature = Ta_obs,
-    #waterTemperature = Tw_obs
+    amplitudeAir = amplitude_air,
+    airTemperature = Ta_bar,
+    waterTemperature = Tw_bar
+  ) |>
+  mutate(
+    month = month(date),
+    week = week(date)
+  ) |>
+  mutate(
+    season = case_when(
+      month %in% c(12, 1, 2) ~ "Winter",
+      month %in% c(3, 4, 5) ~ "Spring",
+      month %in% c(6, 7, 8) ~ "Summer",
+      month %in% c(9, 10, 11) ~ "Autumn",
+      TRUE ~ "NA"
+    ),
+    seasonInt = case_when(
+      month %in% c(12, 1, 2) ~ 4,
+      month %in% c(3, 4, 5) ~ 1,
+      month %in% c(6, 7, 8) ~ 2,
+      month %in% c(9, 10, 11) ~ 3,
+      TRUE ~ NA
+    )
   )
 
 writeParquet(dataIn_metrics, path, dataName_metrics)
