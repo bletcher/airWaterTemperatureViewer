@@ -8,7 +8,7 @@ import * as d3 from "npm:d3";
 import { df_metrics_SR, df_predict_SR, groupAndAggregate } from "./components/modelledTemperatureVariables.js";
 import { filterBySiteID_year_season, filterBySiteID_year } from "/components/rawTemperatureVariables.js";
 
-
+import {VA_data} from "./components/rawTemperatureVariables.js";
 ```
 
 ## Select sites and years
@@ -285,17 +285,20 @@ const selectedAggregator = Generators.input(selectAggregator);
 </div>
 
 ```js
+
 const dtMetricsFilteredByParamsAgg = groupAndAggregate(
   dtMetricsFilteredByParams, // Dataset
   paramListSine, // Parameters to aggregate
-  selectedAggregator,
+  selectedAggregator, // selectedAggregator
+  d3.mean, //aggregation function
   'siteID', 'year', 'model',  // Default grouping variables
 );
 
 const dtMetricsFilteredAgg = groupAndAggregate(
   dtMetricsFiltered, // Dataset
   paramListSine, // Parameters to aggregate
-  selectedAggregator,
+  selectedAggregator, // selectedAggregator
+  d3.mean, //aggregation function
   'siteID', 'year', 'model',  // Default grouping variables
 );
 ```
@@ -365,17 +368,6 @@ plotY1Y2Agg(
 )
 ```
 
-```js
-/*
-plotY1Y2(
-  selectedParamFilter ? dtMetricsFilteredByParams : dtMetricsFiltered, 
-  selectedParamY1, 
-  selectedParamY2, 
-  selectedParamModY1, 
-  selectedParamModY2
-) */
-```
-
 ---
 
 ## Plot the pairs of parameters against each other
@@ -392,4 +384,231 @@ plotX1Y1Agg(
 
 ---
 
-*add map with time slider for the filtered, aggregated data*
+## Dynamic sites map
+
+```js
+const aggList = dtMetricsFilteredByParamsAgg.map(d => d.selectedAggregatorValue);
+
+const selectAggValue = (Inputs.range(d3.extent(aggList), {value: aggList[0], step: 1, width: 500, label: "Select value"}));
+const selectedAggValue = Generators.input(selectAggValue);
+```
+
+<div class="grid grid-cols-2"> 
+  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+    ${selectAggValue}
+  </div>
+</div>
+
+```js
+const dtForMap = dtMetricsFilteredByParamsAgg.filter(d => d.selectedAggregatorValue === selectedAggValue);
+```
+
+```js
+/////////
+// Map //
+/////////
+
+const basemaps1 = {
+  USGS_hydro: L.tileLayer(
+    'https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution: '<a href="http://www.doi.gov">U.S. Department of the Interior</a> | <a href="http://www.usgs.gov">U.S. Geological Survey</a> | <a href="http://www.usgs.gov/laws/policies_notices.html">Policies</a>',
+      maxZoom: 20
+    }
+  ),
+  StreetView: L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',   
+    {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}
+  ),
+  Topography: L.tileLayer.wms(
+    'http://ows.mundialis.de/services/service?',   
+    {layers: 'TOPO-WMS'}
+  ),
+  Places: L.tileLayer.wms(
+    'http://ows.mundialis.de/services/service?', 
+    {layers: 'OSM-Overlay-WMS'}
+  ),
+  USGS_USImagery: L.tileLayer(
+    'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}',
+    {
+      maxZoom: 20,
+      attribution:
+      'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>',
+    }
+  )
+};
+```
+
+```js
+/////////
+// Map //
+/////////
+
+  const lat = 38.5;
+  const lon = -78.0;
+  const mag = 9.2;
+
+  const div_mapMod = display(document.createElement("div"));
+  div_mapMod.style = "height: 500px;";
+
+  const mapMod = L.map(div_mapMod)
+    .setView([lat, lon], mag);
+
+  L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',   
+      {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }
+  )
+  .addTo(mapMod);
+
+  L.control.layers(basemaps1).addTo(mapMod);
+  basemaps1.USGS_hydro.addTo(mapMod);
+
+  // Store the initial map view
+  const initialView = mapMod.getBounds();
+
+  // Update the map view when the window is resized
+  window.addEventListener('resize', function() {
+    mapMod.fitBounds(initialView);
+  });
+```
+
+```js
+const allDataAggExtent = groupAndAggregate(
+  dtMetricsFilteredByParams, // Dataset
+  paramListSine, // Parameters to aggregate - sine has all the parameters
+  null, // selectedAggregator
+  d3.extent, // aggregation function - note this returns an array
+  'siteID'  // Default grouping variables
+);
+```
+
+```js
+function getMarkerData(dIn, variable, func = d3.mean) {
+  const gMean = groupAndAggregate(
+    dIn, // Dataset
+    [variable], // Parameters to aggregate
+    null, // selectedAggregator
+    func, // aggregation function - note this returns an array
+    'siteID'  // Default grouping variables
+  );
+
+  return gMean;
+} 
+```
+
+```js
+const markerDataVar1 = getMarkerData(
+  dtForMap.filter(d => d.model === selectedParamModY1), 
+  selectedParamY1,
+  d3.mean
+).map(d => ({ ...d, stat: "mean" }))
+
+const markerDataVar2 = getMarkerData(
+  dtForMap.filter(d => d.model === selectedParamModY2), 
+  selectedParamY2,
+  d3.mean
+).map(d => ({ ...d, stat: "mean" }))
+```
+
+```js
+updateMarkersMapMod();
+////////////////////////////////////////////////////////
+// Event listener for selectAggValue dropdown updates //
+////////////////////////////////////////////////////////
+selectAggValue.addEventListener('input', function() {
+  updateMarkersMapMod();
+});
+```
+
+```js
+const colorScale = d3.scaleLinear()
+  .domain([0, 0.5, 1]) // The domain is now [0, 1] because the ampRatioMean values have been normalized
+  //    range: ["#00f", "#e31010", "#1685f5"]
+  .range(["#f00a0a", "#f0e40a", "#0d58d1"]);
+```
+
+```js
+const markersLayer = L.layerGroup().addTo(mapMod);
+```
+
+```js
+//////////////////////////////////////////////
+function updateMarkersMapMod() {
+  markersLayer.clearLayers();
+
+  VA_data.forEach(site => {
+    //display(["0", site.siteID, markerDataVar1.filter(d => d.siteID === site.siteID)])
+    if (selectedSites.includes(site.siteID)) {
+      const siteIDDataAll = allDataAggExtent.filter(d => d.siteID === site.siteID);
+      const min1 = siteIDDataAll[0][selectedParamY1][0];
+      const max1 = siteIDDataAll[0][selectedParamY1][1];
+
+      const siteIDData1 = markerDataVar1.filter(d => d.siteID === site.siteID);
+      const mean1 = siteIDData1.filter(d => d.stat === "mean")[0][selectedParamY1];
+
+      const normVar1 = (mean1 - min1) / (max1 - min1);
+      const markerColor = colorScale(normVar1);
+
+  //display(["1",site.siteID, siteIDData1, mean1, normVar1, siteIDDataAll, allDataAggExtent])
+
+      const siteIDData2 = markerDataVar2.filter(d => d.siteID === site.siteID);
+      const mean2 = siteIDData2.filter(d => d.stat === "mean")[0][selectedParamY2];
+
+      const radius = Math.abs(mean2) * 4; // Scale the radius
+
+  //display(["2",site.siteID, siteIDData2, radius])
+
+      const marker = L.circleMarker([site.lat, site.lon], {
+        color: markerColor,
+        fillColor: markerColor,
+        fillOpacity: 0.95,
+        radius: radius
+      });
+
+      markersLayer.addLayer(marker);
+
+      marker.bindPopup(`Site ID: ${site.siteID} <br> ${selectedParamY1}: ${mean1.toFixed(2)} <br> ${selectedParamY2}: ${Math.abs(mean2).toFixed(2)}`);
+      marker.on('mouseover', function (e) {
+        this.openPopup();
+      });
+      marker.on('mouseout', function (e) {
+        this.closePopup();
+      });
+    } else {
+      const markerColor2 = "#6d6d78";
+      const marker = L.circleMarker([site.lat, site.lon], {
+        color: markerColor2,
+        fillColor: markerColor2,
+        fillOpacity: 0.95,
+        radius: 6
+      });
+
+      markersLayer.addLayer(marker);
+
+      marker.bindPopup(`Site ID: ${site.siteID}`);
+      marker.on('mouseover', function (e) {
+        this.openPopup();
+      });
+      marker.on('mouseout', function (e) {
+        this.closePopup();
+      });
+    }
+  });
+}
+```
+
+<div class="grid grid-cols-4">
+  <div class="card grid-colspan-3">
+    ${div_mapMod}
+  </div>
+</div>
+
+
+```js
+display(dtForMap)
+```
+
+```js
+```
