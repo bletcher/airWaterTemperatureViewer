@@ -1,4 +1,6 @@
-## Introduction
+## Introduction  
+  
+<br>
 
 **Air** and **water** temperatures in streams are coupled in interesting and complex ways. Early efforts to understand the relationship between air and water tempratures relied on simply estimating air/water temperature slopes. If air and water are completetely coupled, the slope of the relationship between the two temperatures will be 1.0. However, if the two temperatures are less coupled, the slope of the relationship should be away from 1.0. The slope will be less than one when a driver or combinatino of drivers is making the water relatively cool and above one when the drivers are making the water relatively warm. In the summer, groundwater dominated stream will typically have a slope less than one, while in the winter, the slope can often be greater than one. The devaition of the slope aswy from one can be used as an initial indicator of groundwater influence on stream temperatures.
   

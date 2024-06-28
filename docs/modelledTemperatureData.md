@@ -2,10 +2,11 @@
 import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotY1Y2Agg, plotX1Y1Agg } from "./components/modelledTemperatureDataPlots.js";
 //import {interval} from 'https://observablehq.com/@mootari/range-slider';
 import * as d3 from "npm:d3";
+
 ```
 
 ```js
-import { df_metrics_all, df_predict_all, groupAndAggregate } from "./components/modelledTemperatureVariables.js";
+import { df_metrics_all, df_predict_all, groupAndAggregate, legend2 } from "./components/modelledTemperatureVariables.js";
 import { filterBySiteID_year_season, filterBySiteID_year } from "/components/rawTemperatureVariables.js";
 
 import {VA_data} from "./components/rawTemperatureVariables.js";
@@ -164,7 +165,7 @@ const TgExtent = d3.extent(dtMetricsFiltered, d => d.Tg);
 const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
 ```
 
-
+```html
 <div class="grid grid-cols-2">
   <h2>k</h2><h2>p</h2>
 </div>
@@ -227,7 +228,7 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
   <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
     ${selectMinTg} ${selectMaxTg}
   </div>
-  
+
   ${Plot.plot({
     color: {legend: true},
     height: 300,
@@ -243,6 +244,7 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
   }
   </div>
 </div>
+```
 
 *add r2 panel*
 
@@ -307,8 +309,8 @@ const selectedParamModY2 = Generators.input(selectParamModY2);
 ```
 
 ```js
-const paramListDe = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio"];
-const paramListSine = ["k", "p", "Tg", "Ta_bar", "Tw_bar", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio", "phaseAir", "phaseWater", "amplitudeAir", "amplitudeWater"];
+const paramListDe = ["k", "p", "Tg", "airTemperature", "waterTemperature", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio"];
+const paramListSine = ["k", "p", "Tg", "airTemperature", "waterTemperature", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio", "phaseAir", "phaseWater", "amplitudeAir", "amplitudeWater"];
 
 
 const selectParamY1 = (Inputs.select(selectedParamModY1 === "sine" ? paramListSine : paramListDe, {value: "amplitudeRatio", width: 125, label: "Select parameter"}));
@@ -372,7 +374,8 @@ plotX1Y1Agg(
 
 ## Dynamic sites map
 Drag the range slider to select the value of the aggregation level to display on the map.  
-The values are the possible values of the selected aggregation level (e.g. 1-12 for `month` and 1-366 for `day of year`).
+The values are the possible values of the selected aggregation level (e.g. 1-12 for `month` and 1-366 for `day of year`).  
+The first selected parameter is color, the second is radius.
 
 ```js
 const aggList = dtMetricsFilteredByParamsAgg.map(d => d.selectedAggregatorValue);
@@ -521,8 +524,6 @@ const colorScale = d3.scaleLinear()
 const markersLayer = L.layerGroup().addTo(mapMod);
 ```
 
-First selected parameter is color, the second is radius.
-
 ```js
 //////////////////////////////////////////////
 function updateMarkersMapMod() {
@@ -600,8 +601,20 @@ function updateMarkersMapMod() {
 }
 ```
 
-<div class="grid grid-cols-4">
-  <div class="card grid-colspan-3">
-    ${div_mapMod}
+```js
+const legendColorScale = legend2(colorScale, {
+  title: selectedParamY1,
+  tickFormat: ".0%"
+})
+```
+
+```html
+<div class="card grid grid-cols-4" style="display: flex; flex-direction: column; gap: 1rem; max-width: 900px;">
+  <div class="grid grid-colspan-3" style="margin-left: 10px; margin-bottom: 1px; margin-top: 5px">
+    ${legendColorScale}
   </div>
+  <div class="grid grid-colspan-3"> 
+      ${div_mapMod}
+  </div>  
 </div>
+```
