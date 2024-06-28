@@ -1,8 +1,11 @@
 import {FileAttachment} from "npm:@observablehq/stdlib";
 import * as d3 from "npm:d3";
 
-export const df_metrics_SR = await FileAttachment("../data/parquet/shen/tim/df_metrics_SR-0.parquet").parquet();
-export const df_predict_SR = await FileAttachment("../data/parquet/shen/tim/df_predict_SR-0.parquet").parquet();
+//export const df_metrics_SR = await FileAttachment("../data/parquet/shen/tim/df_metrics_SR-0.parquet").parquet();
+//export const df_predict_SR = await FileAttachment("../data/parquet/shen/tim/df_predict_SR-0.parquet").parquet();
+
+export const df_metrics_all = await FileAttachment("../data/parquet/shen/tim/df_metrics_all-0.parquet").parquet();
+export const df_predict_all = await FileAttachment("../data/parquet/shen/tim/df_predict_all-0.parquet").parquet();
 
 export function groupAndAggregate0(data, paramList, selectedAggregator, ...groupingVariables) {
   // Add selectedAggregator to the list of grouping variables if it's not already included

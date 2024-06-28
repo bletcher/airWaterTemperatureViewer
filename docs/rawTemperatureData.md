@@ -18,7 +18,10 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
 //tmp
 ```
 
-**Steps**: aggregation level &rarr; filtering (`sites, years, seasons`) &rarr; raw data plots
+**Steps**: 
+1. **select** aggregation level &rarr; 
+2. **filter** by `site, year, season` &rarr;  
+3. **view** raw data plots
 
 Data can be aggregated across time scales ranging from the `raw data`, to `daily` (the default), to `annual`. All figures below will show data from the selected aggregation level. Aggregation here is simply calculating site-specific mean air and water temperatures for the selected aggregation level.  
 
@@ -449,31 +452,4 @@ const binWidthIn = getBinWidth(dtFiltered)
 
 ```js
 plotHexBin(dtFiltered, lineData, binWidthIn, selectedRAsCount)
-```
-
-```js
-dtFiltered
-```
-
-```js
-dtFiltered.map(d => d.dischargeLog10)
-//dtFiltered.map(d => [...new Set(d.dischargeLog10)])
-```
-
-```js
-  const dischargeScale = d3.scaleLinear(
-      d3.extent(dtFiltered, d => d.dischargeLog10),
-      [3, 6]
-  );
-```
-
-```js
-dischargeScale(0)
-```
-
-```js
-
-```
-
-```js
 ```

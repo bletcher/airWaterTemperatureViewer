@@ -23,6 +23,12 @@ library(tidyverse)
 #remotes::install_github("timothy-d-lambert/dePAWT")
 library(dePAWT)
 
+sitesToInclude <- c(
+    "PA_01FL", "PA_06FL", "PA_10FL",
+    "PI_01FL", "PI_06FL", "PI_10FL",
+    "SR_01FL", "SR_06FL", "SR_10FL"
+  )
+
 writeParquet <- function(dataIn, pathIn, dataNameIn) {
   write_dataset(
     dataset = dataIn,
@@ -38,6 +44,27 @@ writeParquet <- function(dataIn, pathIn, dataNameIn) {
 # This loads "df_metrics_de"   "df_metrics_sine"
 # "df_predict_de"   "df_predict_sine"
 load("./docs/data/dataIn/EcoDrought-sites_calcs_SR_26Jun2024.RData")
+mDeSR <- df_metrics_de
+mSineSR <- df_metrics_sine
+pDeSR <- df_predict_de
+pSineSR <- df_predict_sine
+
+load("./docs/data/dataIn/EcoDrought-sites_calcs_PI_26Jun2024.RData")
+mDePI <- df_metrics_de
+mSinePI <- df_metrics_sine
+pDePI <- df_predict_de
+pSinePI <- df_predict_sine
+
+load("./docs/data/dataIn/EcoDrought-sites_calcs_PA_26Jun2024.RData")
+mDePA <- df_metrics_de
+mSinePA <- df_metrics_sine
+pDePA <- df_predict_de
+pSinePA <- df_predict_sine
+
+df_metrics_de <- bind_rows(mDeSR, mDePI, mDePA)
+df_metrics_sine <- bind_rows(mSineSR, mSinePI, mSinePA)
+df_predict_de <- bind_rows(pDeSR, pDePI, pDePA)
+df_predict_sine <- bind_rows(pSineSR, pSinePI, pSinePA)
 
 str(df_predict_de)
 path <- "./docs/data/parquet/shen/tim/"
@@ -46,7 +73,7 @@ path <- "./docs/data/parquet/shen/tim/"
 #  Combined de and sine files  ##############################################
 
 ##  df_metrics_de_SR  #######################################################
-dataName_metrics <- "df_metrics_SR"
+dataName_metrics <- "df_metrics_all"
 dataIn_metrics <- df_metrics_de |>
   mutate(model = "de") |>
   select(-site_air) |>
@@ -90,7 +117,8 @@ dataIn_metrics <- df_metrics_de |>
       month %in% c(9, 10, 11) ~ 3,
       TRUE ~ NA
     )
-  )
+  ) |>
+  filter(siteID %in% sitesToInclude)
 
 writeParquet(dataIn_metrics, path, dataName_metrics)
 
@@ -98,7 +126,7 @@ writeParquet(dataIn_metrics, path, dataName_metrics)
 ##  df_predict_de_SR  #######################################################
 # write dt to parquet
 # 'Tw' is from the 'de' model
-dataName_predict <- "df_predict_SR"
+dataName_predict <- "df_predict_all"
 dataIn_predict_both <- df_predict_sine |>
   mutate(model = "sine") |>
   ungroup() |>
@@ -120,7 +148,8 @@ dataIn_predict_both <- df_predict_sine |>
     waterTemperaturePredict = Tw_predict,
     airTemperaturePredict = Ta_predict
   ) |>
-  distinct()
+  distinct() |>
+  filter(siteID %in% sitesToInclude)
 
 dataIn_predict_wider <- dataIn_predict_both |>
   pivot_wider(
@@ -130,6 +159,6 @@ dataIn_predict_wider <- dataIn_predict_both |>
       airTemperaturePredict
     )
   ) |>
-  select(-airTemperaturePredict_de) # not predicted for de model
+  select(-airTemperaturePredict_de)  # not predicted for de model
 
 writeParquet(dataIn_predict_wider, path, dataName_predict)

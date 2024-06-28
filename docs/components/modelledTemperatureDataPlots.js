@@ -148,7 +148,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
       Plot.text(dInMetrics.filter(dd => dd.model === "sine"),
         Plot.selectLast({
           x: 24,//"hour", 
-          y: "Tw_bar", 
+          y: "waterTemperature", 
           fill: "siteID",
           text: d => d.rSquared === null ? null : `sine: ${rSquaredText}= ${d.rSquared.toFixed(2)}`,  
           lineAnchor: "bottom", 
@@ -158,7 +158,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
       Plot.text(dInMetrics.filter(dd => dd.model === "de"),
         Plot.selectLast({
           x: 24,//"hour", 
-          y: "Tw_bar", 
+          y: "waterTemperature", 
           fill: "siteID",
           text: d => d.rSquared === null ? null :  `de: ${rSquaredText}= ${d.rSquared.toFixed(2)}`,  
           lineAnchor: "bottom", 

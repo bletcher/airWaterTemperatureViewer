@@ -5,11 +5,21 @@ import * as d3 from "npm:d3";
 ```
 
 ```js
-import { df_metrics_SR, df_predict_SR, groupAndAggregate } from "./components/modelledTemperatureVariables.js";
+import { df_metrics_all, df_predict_all, groupAndAggregate } from "./components/modelledTemperatureVariables.js";
 import { filterBySiteID_year_season, filterBySiteID_year } from "/components/rawTemperatureVariables.js";
 
 import {VA_data} from "./components/rawTemperatureVariables.js";
 ```
+
+**Steps**:  
+1. **filter** by `sites` and `years` &rarr;  
+2. **view** time series plots &rarr;  
+3. **filter** by `k`, `p`, and `Tg` &rarr;  
+4. **select** temporal aggregation level &rarr;  
+5. **view** parameter pair plots &rarr;  
+6. **view** map with sites coded by selected parameter values
+
+---
 
 ## Select sites and years
 
@@ -23,8 +33,8 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
 </div>
 
 ```js
-const dtPredict = [...df_predict_SR];
-const dtMetrics = [...df_metrics_SR];
+const dtPredict = [...df_predict_all];
+const dtMetrics = [...df_metrics_all];
 ```
 
 ```js
@@ -113,14 +123,16 @@ const dtMetricsHovered = timeSeriesHover === null ?
 
 ```js
 plotCurveHover(dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID)
+//display([dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID])
 ```
-In the graph above, the curve it for the sine model is the solid line and for the differential equation model (`de`) the lide is dashed. There is no `de` model for the air temperature.  
+
+In the graph above, the curve it for the `sine` model is the solid line and for the differential equation model (`de`) the line is dashed. There is no `de` model for air temperature.  
 
 ---
 
 ## Filter on parameters
-For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...` . The dataset for plotting below can be filtered by selecting the min/max parameter values. The range sliders start with reasonable values, but the full range can be selected.  
-The *time series graphs* are updated to show only the data within the selected range.
+We can get some unreaasonable parameter estimates from the models. Use the silders below to filter the dataset to include only the filtered range of values in the graphs and map below.  
+For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...` . The range sliders start with reasonable values, but the full or a more limited range can be selected.  
 
 ```js
 const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
@@ -237,6 +249,7 @@ const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
 ---
 
 ## Aggregation
+Select the level of temporal aggregation for the plots and map below.
 
 ```js
 const aggregator = new Map([
@@ -277,8 +290,6 @@ const dtMetricsFilteredAgg = groupAndAggregate(
 
 ---
 
-## Plot pairs of parameters over day of year
-*Could put these graphs next to each other*
 
 ```js
 const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 100, label: "Show filtered data?"}));
@@ -307,6 +318,9 @@ const selectParamY2 = (Inputs.select(selectedParamModY2 === "sine" ? paramListSi
 const selectedParamY2 = Generators.input(selectParamY2);
 ```
 
+## Select parameters for plotting
+Select the model (`sine` or `de`) and the two parameters to plot below in the graphs and on the map.
+
 <div class="grid grid-cols-3"> 
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
     ${selectParamFilter}
@@ -323,6 +337,11 @@ const selectedParamY2 = Generators.input(selectParamY2);
     ${selectParamModY2} ${selectParamY2}
   </div>
 </div>
+
+---
+
+## Plot pairs of parameters over day of year
+*Could put these graphs next to each other*
 
 ```js
 plotY1Y2Agg(
@@ -352,6 +371,8 @@ plotX1Y1Agg(
 ---
 
 ## Dynamic sites map
+Drag the range slider to select the value of the aggregation level to display on the map.  
+The values are the possible values of the selected aggregation level (e.g. 1-12 for `month` and 1-366 for `day of year`).
 
 ```js
 const aggList = dtMetricsFilteredByParamsAgg.map(d => d.selectedAggregatorValue);
@@ -470,13 +491,13 @@ const markerDataVar1 = getMarkerData(
   dtForMap.filter(d => d.model === selectedParamModY1), 
   selectedParamY1,
   d3.mean
-).map(d => ({ ...d, stat: "mean" }))
+).map(d => ({ ...d, stat: "mean" }));
 
 const markerDataVar2 = getMarkerData(
   dtForMap.filter(d => d.model === selectedParamModY2), 
   selectedParamY2,
   d3.mean
-).map(d => ({ ...d, stat: "mean" }))
+).map(d => ({ ...d, stat: "mean" }));
 ```
 
 ```js
@@ -500,7 +521,7 @@ const colorScale = d3.scaleLinear()
 const markersLayer = L.layerGroup().addTo(mapMod);
 ```
 
-First variable is color, second is radius.
+First selected parameter is color, the second is radius.
 
 ```js
 //////////////////////////////////////////////
@@ -508,22 +529,28 @@ function updateMarkersMapMod() {
   markersLayer.clearLayers();
 
   VA_data.forEach(site => {
-    //display(["0", site.siteID, markerDataVar1.filter(d => d.siteID === site.siteID)])
-    if (selectedSites.includes(site.siteID)) {
+    const siteIDData1 = markerDataVar1.filter(d => d.siteID === site.siteID);
+    const siteIDData2 = markerDataVar2.filter(d => d.siteID === site.siteID);
+
+    if (
+      selectedSites.includes(site.siteID) && 
+      siteIDData1.length > 0 && 
+      siteIDData2.length > 0
+    ) {
       const siteIDDataAll = allDataAggExtent.filter(d => d.siteID === site.siteID);
-      
+
       const min1 = siteIDDataAll[0][selectedParamY1][0];
       const max1 = siteIDDataAll[0][selectedParamY1][1];
 
-      const siteIDData1 = markerDataVar1.filter(d => d.siteID === site.siteID);
+      //const siteIDData1 = markerDataVar1.filter(d => d.siteID === site.siteID);
       const mean1 = siteIDData1.filter(d => d.stat === "mean")[0][selectedParamY1];
 
       const normVar1 = (mean1 - min1) / (max1 - min1);
       const markerColor = colorScale(normVar1);
 
-  //display(["1",site.siteID, siteIDData1, mean1, normVar1, siteIDDataAll, allDataAggExtent])
+  //display(["1",site.siteID, siteIDDataAll, siteIDData1, mean1, normVar1, siteIDDataAll, allDataAggExtent])
 
-      const siteIDData2 = markerDataVar2.filter(d => d.siteID === site.siteID);
+      //const siteIDData2 = markerDataVar2.filter(d => d.siteID === site.siteID);
       const min2 = siteIDDataAll[0][selectedParamY2][0];
       const max2 = siteIDDataAll[0][selectedParamY2][1];
 
@@ -532,7 +559,7 @@ function updateMarkersMapMod() {
       const normVar2 = (mean2 - min2) / (max2 - min2);
       const radius = (normVar2 + 1) * 7; // Scale the radius
 
-  //display(["2",site.siteID, siteIDData2, radius])
+  //display(["2",site.siteID, siteIDData2, mean2, radius])
 
       const marker = L.circleMarker([site.lat, site.lon], {
         color: markerColor,
@@ -542,7 +569,7 @@ function updateMarkersMapMod() {
       });
 
       markersLayer.addLayer(marker);
-display([mean1.toFixed(2), normVar1.toFixed(2), selectedParamY2, mean2.toFixed(2), normVar2.toFixed(2)])
+//display([mean1.toFixed(2), normVar1.toFixed(2), selectedParamY2, mean2.toFixed(2), normVar2.toFixed(2)])
       marker.bindPopup(`Site ID: ${site.siteID} <br> ${selectedParamY1}: ${mean1.toFixed(2)} (${normVar1.toFixed(2)}) <br> ${selectedParamY2}: ${mean2.toFixed(2)} (${normVar2.toFixed(2)})`);
       marker.on('mouseover', function (e) {
         this.openPopup();
@@ -578,11 +605,3 @@ display([mean1.toFixed(2), normVar1.toFixed(2), selectedParamY2, mean2.toFixed(2
     ${div_mapMod}
   </div>
 </div>
-
-
-```js
-display(dtForMap)
-```
-
-```js
-```
