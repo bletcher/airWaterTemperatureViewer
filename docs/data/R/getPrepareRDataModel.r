@@ -43,19 +43,22 @@ writeParquet <- function(dataIn, pathIn, dataNameIn) {
 # Get raw data
 # This loads "df_metrics_de"   "df_metrics_sine"
 # "df_predict_de"   "df_predict_sine"
-load("./docs/data/dataIn/EcoDrought-sites_calcs_SR_26Jun2024.RData")
+#load("./docs/data/dataIn/EcoDrought-sites_calcs_SR_26Jun2024.RData")
+load("./docs/data/dataIn/EcoDrought-sites_calcs_SR_1Jul2024.RData")
 mDeSR <- df_metrics_de
 mSineSR <- df_metrics_sine
 pDeSR <- df_predict_de
 pSineSR <- df_predict_sine
 
-load("./docs/data/dataIn/EcoDrought-sites_calcs_PI_26Jun2024.RData")
+#load("./docs/data/dataIn/EcoDrought-sites_calcs_PI_26Jun2024.RData")
+load("./docs/data/dataIn/EcoDrought-sites_calcs_PI_1Jul2024.RData")
 mDePI <- df_metrics_de
 mSinePI <- df_metrics_sine
 pDePI <- df_predict_de
 pSinePI <- df_predict_sine
 
-load("./docs/data/dataIn/EcoDrought-sites_calcs_PA_26Jun2024.RData")
+#load("./docs/data/dataIn/EcoDrought-sites_calcs_PA_26Jun2024.RData")
+load("./docs/data/dataIn/EcoDrought-sites_calcs_PA_1Jul2024.RData")
 mDePA <- df_metrics_de
 mSinePA <- df_metrics_sine
 pDePA <- df_predict_de
@@ -86,7 +89,9 @@ dataIn_metrics <- df_metrics_de |>
   ) |>
   rename(
     siteID = site,
-    rSquared = R2,
+    rSquaredDE = R2,
+    rSquaredAir = R2_air,
+    rSquaredWater = R2_water,
     amplitudeRatio = amplitude_ratio,
     phaseLag = phase_lag,
     meanOffset = mean_offset,
@@ -95,12 +100,13 @@ dataIn_metrics <- df_metrics_de |>
     phaseAir = phase_air,
     amplitudeWater = amplitude_water,
     amplitudeAir = amplitude_air,
-    airTemperature = Ta_bar,
-    waterTemperature = Tw_bar
+    airTemperature = Ta_obs,
+    waterTemperature = Tw_obs
   ) |>
   mutate(
     month = month(date),
-    week = week(date)
+    week = week(date),
+    hour = hour(date)
   ) |>
   mutate(
     season = case_when(
@@ -149,7 +155,18 @@ dataIn_predict_both <- df_predict_sine |>
     airTemperaturePredict = Ta_predict
   ) |>
   distinct() |>
-  filter(siteID %in% sitesToInclude)
+  filter(siteID %in% sitesToInclude) |>
+  group_by(siteID, year, yday, hour, model) |>
+  summarize(
+    dateTime = mean(dateTime, na.rm = TRUE),
+    hmsProp = mean(hmsProp, na.rm = TRUE),
+    waterTemperature = mean(waterTemperature, na.rm = TRUE),
+    airTemperature = mean(airTemperature, na.rm = TRUE),
+    waterTemperaturePredict = mean(waterTemperaturePredict, na.rm = TRUE),
+    airTemperaturePredict = mean(airTemperaturePredict, na.rm = TRUE),
+    ydayHMS = mean(ydayHMS, na.rm = TRUE)
+  ) |>
+  ungroup()
 
 dataIn_predict_wider <- dataIn_predict_both |>
   pivot_wider(

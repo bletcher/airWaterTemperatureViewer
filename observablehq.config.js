@@ -13,8 +13,9 @@ export default {
          //{name: "Temperature", path: "/temperatureData"},
         // {name: "Temperature - parquet", path: "/temperatureDataParquet"},
          {name: "Introduction", path: "/introduction"},
-         {name: "Raw Temperature", path: "/rawTemperatureData"},
-         {name: "Modelled Temperature", path: "/modelledTemperatureData"},
+         {name: "Raw Temperature", path: "/temperatureDataRaw"},
+         {name: "Modelled Temperature", path: "/temperatureDataModel"},
+         {name: "Modelled Temperature2", path: "/temperatureDataModel2"},
          //{name: "Flow and temperature", path: "/temperatureFlowData"}
        ] 
       }/*,
@@ -37,10 +38,11 @@ export default {
    ],
 
   // Some additional configuration options and their defaults:
-  // theme: "default", // try "light", "dark", "slate", etc.
+  // theme: "dashboard", // try "light", "dark", "slate", etc.
+  // style: "gridCustom.css", // a custom CSS file to
   // header: "", // what to show in the header (HTML)
   // footer: "Built with Observable.", // what to show in the footer (HTML)
-  // toc: true, // whether to show the table of contents
+  // toc: false, // whether to show the table of contents
   // pager: true, // whether to show previous & next links in the footer
    root: "docs", // path to the source root for preview
    output: "dist", // path to the output root for build

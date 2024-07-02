@@ -1,4 +1,3 @@
-import { line, min } from "d3";
 import * as Plot from "npm:@observablehq/plot";
 import * as d3 from "npm:d3";
 
@@ -35,7 +34,7 @@ export function plotTimeSeries(d, groupSiteID, showWater, showAir, selectedFacet
           stroke: "grey", 
           fy: selectedFacetYearly ? "year" : "null",
           fx: "siteID",
-          tip: showAir ? true : false
+          tip: showAir ? true : false // this is necessary for the hover graph to work
         }
       ),
         Plot.line(d, 
@@ -69,7 +68,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
   if (timeSeriesHover === null) {
     return Plot.plot({
       //title:  `Mouse over the time series chart above to see the hourly chart for the selected site, year, and day of year.`,
-      title: "Mouse over the chart above.",
+      title: "Mouse over the time series chart.",
       width,
       marginTop: 30,
       marginRight: 50,
@@ -80,7 +79,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
   } else {
 
     return Plot.plot({
-      title:  `Site ID: ${timeSeriesHover.siteID}, Year: ${timeSeriesHover.year}, Yday: ${timeSeriesHover.yday}`,
+      title:  `Site ID: ${timeSeriesHover.siteID}, Year: ${timeSeriesHover.year}, Day of year: ${timeSeriesHover.yday}`,
       width,
       marginTop: 30,
       marginRight: 50,
@@ -112,7 +111,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
             x: "hour", 
             y: "waterTemperaturePredict_de",
             stroke: "siteID",
-            strokeDasharray: "4 3",
+            strokeDasharray: "4 3"
             //marker: "circle-stroke"
           }
         ),
@@ -140,7 +139,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
           x: "hour", 
           y: "airTemperaturePredict_de",
           stroke: "darkgrey",
-          strokeDasharray: "4 3",
+          strokeDasharray: "4 3"
           //marker: "circle-stroke"
         }
       ),
@@ -148,11 +147,21 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
       Plot.text(dInMetrics.filter(dd => dd.model === "sine"),
         Plot.selectLast({
           x: 24,//"hour", 
+          y: "airTemperature", 
+          fill: "darkgrey",
+          text: d => d.rSquaredAir === null ? null : `sine: ${rSquaredText}= ${d.rSquaredAir.toFixed(2)}`,  
+          lineAnchor: "middle", 
+          dy: 0, dx: 20
+        })
+      ), 
+      Plot.text(dInMetrics.filter(dd => dd.model === "sine"),
+        Plot.selectLast({
+          x: 24,//"hour", 
           y: "waterTemperature", 
           fill: "siteID",
-          text: d => d.rSquared === null ? null : `sine: ${rSquaredText}= ${d.rSquared.toFixed(2)}`,  
+          text: d => d.rSquaredWater === null ? null : `sine: ${rSquaredText}= ${d.rSquaredWater.toFixed(2)}`,  
           lineAnchor: "bottom", 
-          dy: 0, dx: 12
+          dy: 0, dx: 20
         })
       ), 
       Plot.text(dInMetrics.filter(dd => dd.model === "de"),
@@ -160,9 +169,9 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
           x: 24,//"hour", 
           y: "waterTemperature", 
           fill: "siteID",
-          text: d => d.rSquared === null ? null :  `de: ${rSquaredText}= ${d.rSquared.toFixed(2)}`,  
+          text: d => d.rSquaredDE === null ? null :  `de: ${rSquaredText}= ${d.rSquaredDE.toFixed(2)}`,  
           lineAnchor: "bottom", 
-          dy: 15, dx: 12
+          dy: 15, dx: 16
         })
       )
       ]

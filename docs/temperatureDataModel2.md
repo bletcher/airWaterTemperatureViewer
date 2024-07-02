@@ -1,3 +1,9 @@
+---
+toc: false
+theme: dashboard
+style: gridCustom.css
+---
+
 ```js
 import { plotTimeSeries, plotCurveHover, plotPhaseAmp, plotY1Y2, plotY1Y2Agg, plotX1Y1Agg } from "./components/modelledTemperatureDataPlots.js";
 //import {interval} from 'https://observablehq.com/@mootari/range-slider';
@@ -22,14 +28,211 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
 
 ---
 
+<div class="grid grid-cols-3"> 
+  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc;" class="card">
+    ${showWater}
+    ${showAir}
+    
+  </div>
+</div>
+
+```html
+<div class="wrapper">
+  <div class="card selectors"><h1>Selectors</h1>
+    <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px">
+      <h2>Select sites:  </h2>
+      ${selectSites}
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px">
+      <h2>Select years:</h2>
+      ${selectYears}
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px;">
+      <h2>Select aggregation level:</h2>
+      ${selectAggregator}
+    </div>
+ 
+    <hr>
+  
+    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+      <h2>Show filtered data:</h2>
+      ${selectParamFilter}
+    </div>
+
+    <hr>
+
+    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+      Variable 1 (y in pairs plot)  
+      <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px;">
+        Select model: ${selectParamModY1} 
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 20px;">
+        Select parameter: ${selectParamY1}
+      </div>
+    </div>
+    
+    <hr>
+
+    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+      Variable 2 (y in pairs plot)  
+      <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px;">
+        Select model: ${selectParamModY2} 
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 20px;">
+        Select parameter: ${selectParamY2}
+      </div>
+    </div>
+  </div>
+
+  <div class="card r1c1"><h2>Time series</h2>
+    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc; margin-top: 10px;">
+      ${facetYearly}
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
+      ${plottedTimeSeries}
+    </div>
+  </div>
+  <div class="card r1c2"><h2>Sub-daily plot</h2>
+    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 40px;">
+      ${plottedCurveHover}
+    </div>
+  </div>
+
+  <div class="card r2c1">Two selected variables over day of year
+    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 30px;">
+      ${plottedY1Y2Agg}
+    </div>
+  </div>
+  <div class="card r2c2">Two selected variables against each other
+    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 30px;">
+      ${plottedX1Y1Agg}
+    </div>
+  </div>
+
+  <div class="card r3c1">Map
+    <div class="card" style="display: flex; align-items: center;">
+      <div style="margin-left: 10px; margin-bottom: 1px; margin-top: 5px">
+        ${legendColorScale} 
+      </div>
+      <div style="margin-left: 10px; margin-bottom: 1px; margin-top: 5px; margin-left: 150px;">
+        ${selectAggValue}
+      </div>
+    </div>
+    <div class="card", style="padding: 0; border: 2px solid darkgrey; border-radius: 2px;"> 
+        ${div_mapMod}
+    </div>
+  </div>
+
+  <div class="r4c1">
+    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
+
+    Extent of raw `k` = ${roundedKExtentSine[0]} to ${roundedKExtentSine[1]} for model `sine`  
+    Extent of raw `k` = ${roundedKExtentDe[0]} to ${roundedKExtentDe[1]} for model `de`
+
+    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+      ${selectMinK} ${selectMaxK}
+    </div>
+
+    ${Plot.plot({
+      color: {legend: true},
+      height: 300,
+      marks: [
+        Plot.rectY(
+          dtMetricsFiltered.filter(
+            d => d.k >= selectedMinK && d.k <= selectedMaxK
+          ),
+      Plot.binX({y: "count"}, {x: "k", fill: "model"})),
+        Plot.ruleY([0])
+      ]
+      })
+    }
+    </div>
+  </div>
+  <div class="r4c2">
+    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f2f0ed" class="card">
+      Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
+
+      <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+        ${selectMinP} ${selectMaxP}
+      </div>
+
+      ${Plot.plot({
+        color: {legend: true},
+        height: 300,
+        marks: [
+          Plot.rectY(
+            dtMetricsFiltered.filter(
+              d => d.p >= selectedMinP && d.p <= selectedMaxP
+            ),
+        Plot.binX({y: "count"}, {x: "p", fill: "model"})),
+          Plot.ruleY([0])
+        ]
+        })
+      }
+    </div>
+  </div>
+  <div class="r4c3">
+    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+
+    Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
+
+    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+      ${selectMinTg} ${selectMaxTg}
+    </div>
+
+    ${Plot.plot({
+      color: {legend: true},
+      height: 300,
+      marks: [
+        Plot.rectY(
+          dtMetricsFiltered.filter(
+            d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
+          ),
+      Plot.binX({y: "count"}, {x: "Tg", fill: "model"})),
+        Plot.ruleY([0])
+      ]
+      })
+    }
+    </div>
+  </div>
+  <div class="r4c4">
+    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+
+    Extent of raw `rSquared` = ${roundedR2Extent[0]} to ${roundedR2Extent[1]}. need to fix this
+
+    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+      ${selectMinR2} ${selectMaxR2}
+    </div>
+
+    ${Plot.plot({
+      color: {legend: true},
+      height: 300,
+      marks: [
+        Plot.rectY(
+          dtMetricsFiltered.filter(
+            d => d.rSquaredDE >= selectedMinR2 && d.rSquaredDE <= selectedMaxR2 
+          ),
+      Plot.binX({y: "count"}, {x: "rSquaredDE", fill: "model"})),
+        Plot.ruleY([0])
+      ]
+      })
+    }
+    </div>
+  </div>
+</div>
+```
+
+
+---
+
 ## Select sites and years
 
 <div class="grid grid-cols-3">
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectSites}
+    
   </div>
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectYears}
+
   </div>
 </div>
 
@@ -58,11 +261,11 @@ const selectedFacetYearly = Generators.input(facetYearly);
 const sites = [...new Set(dtPredict.map(d => d.siteID))].sort();
 const selectSites = Inputs.select(sites, {
   value: [sites[0]], // needs to be an array
-  multiple: 8, width: 100, label: "Select sites:"});
+  multiple: 8, width: 100});
 const selectedSites = Generators.input(selectSites);
 
 const years = [...new Set(dtPredict.map(d => d.year))].sort();
-const selectYears = (Inputs.select(years, {value: [years[1]], multiple: true, width: 80, label: "Select years:"}));
+const selectYears = (Inputs.select(years, {value: [years[1]], multiple: true, width: 10}));
 const selectedYears = Generators.input(selectYears);
 
 const seasons = ["Spring", "Summer", "Autumn", "Winter"];//[...new Set(dt.map(d => d.season))];
@@ -89,25 +292,29 @@ const selectedMinTg = Generators.input(selectMinTg);
 
 const selectMaxTg = (Inputs.range([0, TgExtent[1]], {value: 22, step: 0.1, width: 300, label: "Select maximum `Tg`", transform: Math.log}));
 const selectedMaxTg = Generators.input(selectMaxTg);
+
+const selectMinR2 = (Inputs.range([r2Extent[0].toFixed(0), 0.99], {value: 0.01, step: 0.01, width: 300, label: "Select minimum `r2`"}));
+const selectedMinR2 = Generators.input(selectMinR2);
+
+const selectMaxR2 = (Inputs.range([0.01, 1.01], {value: 1, step: 0.01, width: 300, label: "Select maximum `r2`", transform: Math.log}));
+const selectedMaxR2 = Generators.input(selectMaxR2);
 ```
 
 ---
 
 ## Plot raw data time series
 
-<div class="grid grid-cols-3"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc;" class="card">
-    ${showWater}
-    ${showAir}
-    ${facetYearly}
-  </div>
-</div>
+
 
 Mouse over the time series chart below to see the hourly chart for the chosen site, year, and day of year.  
 In the sub-daily graph, water temperature is in site-specific color and air temperature is grey. Predictions are the smooth lines.
 
 ```js
-const timeSeriesHover = view(plotTimeSeries(dtPredictFiltered, groupSiteID, selectedShowWater, selectedShowAir, selectedFacetYearly));
+const plottedTimeSeries = plotTimeSeries(dtPredictFiltered, groupSiteID, selectedShowWater, selectedShowAir, selectedFacetYearly, width);
+```
+
+```js
+const timeSeriesHover = view(plottedTimeSeries);
 ```
 
 ```js
@@ -123,8 +330,13 @@ const dtMetricsHovered = timeSeriesHover === null ?
 ```
 
 ```js
-plotCurveHover(dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID)
+const plottedCurveHover = plotCurveHover(dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID);
+
+```
+
+```js
 //display([dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID])
+//display(view(plottedTimeSeries))
 ```
 
 In the graph above, the curve it for the `sine` model is the solid line and for the differential equation model (`de`) the line is dashed. There is no `de` model for air temperature.  
@@ -143,8 +355,14 @@ const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
       d.k >= selectedMinK && 
       d.k <= selectedMaxK &&
       d.Tg >= selectedMinTg && 
-      d.Tg <= selectedMaxTg
+      d.Tg <= selectedMaxTg //&&
+      //d.rSquaredDE >= selectedMinR2 && 
+      //d.rSquaredDE <= selectedMaxR2
   )
+```
+
+```js
+dtMetricsFilteredByParams
 ```
 
 ```js
@@ -165,88 +383,10 @@ const TgExtent = d3.extent(dtMetricsFiltered, d => d.Tg);
 const roundedTgExtent = TgExtent.map(value => Number(value.toFixed(2)));
 ```
 
-```html
-<div class="grid grid-cols-2">
-  <h2>k</h2><h2>p</h2>
-</div>
-<div class="grid grid-cols-2">
-  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
-
-  Extent of raw `k` = ${roundedKExtentSine[0]} to ${roundedKExtentSine[1]} for model `sine`  
-  Extent of raw `k` = ${roundedKExtentDe[0]} to ${roundedKExtentDe[1]} for model `de`
-
-  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-    ${selectMinK} ${selectMaxK}
-  </div>
-
-  ${Plot.plot({
-    color: {legend: true},
-    height: 300,
-    marks: [
-      Plot.rectY(
-        dtMetricsFiltered.filter(
-          d => d.k >= selectedMinK && d.k <= selectedMaxK
-        ),
-    Plot.binX({y: "count"}, {x: "k", fill: "model"})),
-      Plot.ruleY([0])
-    ]
-    })
-  }
-  </div>
-<div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f2f0ed" class="card">
-
-  Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
-
-  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-    ${selectMinP} ${selectMaxP}
-  </div>
-
-  ${Plot.plot({
-    color: {legend: true},
-    height: 300,
-    marks: [
-      Plot.rectY(
-        dtMetricsFiltered.filter(
-          d => d.p >= selectedMinP && d.p <= selectedMaxP
-        ),
-    Plot.binX({y: "count"}, {x: "p", fill: "model"})),
-      Plot.ruleY([0])
-    ]
-    })
-  }
-  </div>
-</div>
-
-<div class="grid grid-cols-2">
-  <h2>Tg</h2>
-</div>
-<div class="grid grid-cols-2">
-  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-
-  Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
-
-  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-    ${selectMinTg} ${selectMaxTg}
-  </div>
-
-  ${Plot.plot({
-    color: {legend: true},
-    height: 300,
-    marks: [
-      Plot.rectY(
-        dtMetricsFiltered.filter(
-          d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
-        ),
-    Plot.binX({y: "count"}, {x: "Tg", fill: "model"})),
-      Plot.ruleY([0])
-    ]
-    })
-  }
-  </div>
-</div>
+```js
+const r2Extent = d3.extent(dtMetricsFiltered, d => d.rSquaredDE);
+const roundedR2Extent = r2Extent.map(value => Number(value.toFixed(2)));
 ```
-
-*add r2 panel*
 
 ---
 
@@ -261,14 +401,12 @@ const aggregator = new Map([
   ["Week", "week"],
   ["Day of year", "yday"]
 ]);
-const selectAggregator = (Inputs.select(aggregator, {value: "yday", multiple: false, width: 110, label: "Select aggregation level"}));
+const selectAggregator = (Inputs.select(aggregator, {value: "yday", multiple: false, width: 100}));
 const selectedAggregator = Generators.input(selectAggregator);
 ```
 
 <div class="grid grid-cols-3"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectAggregator}
-  </div>
+
 </div>
 
 ```js
@@ -294,17 +432,17 @@ const dtMetricsFilteredAgg = groupAndAggregate(
 
 
 ```js
-const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 100, label: "Show filtered data?"}));
+const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 50}));
 const selectedParamFilter = Generators.input(selectParamFilter);
 ```
 
 ```js
 const modelList = ["sine", "de"];
 
-const selectParamModY1 = (Inputs.select(modelList, {value: [modelList[0]], width: 60, label: "Select model"}));
+const selectParamModY1 = (Inputs.select(modelList, {value: [modelList[0]], width: 50}));
 const selectedParamModY1 = Generators.input(selectParamModY1);
 
-const selectParamModY2 = (Inputs.select(modelList, {value: [modelList[0]], width: 60, label: "Select model"}));
+const selectParamModY2 = (Inputs.select(modelList, {value: [modelList[0]], width: 50}));
 const selectedParamModY2 = Generators.input(selectParamModY2);
 ```
 
@@ -313,32 +451,17 @@ const paramListDe = ["k", "p", "Tg", "airTemperature", "waterTemperature", "ampl
 const paramListSine = ["k", "p", "Tg", "airTemperature", "waterTemperature", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio", "phaseAir", "phaseWater", "amplitudeAir", "amplitudeWater"];
 
 
-const selectParamY1 = (Inputs.select(selectedParamModY1 === "sine" ? paramListSine : paramListDe, {value: "amplitudeRatio", width: 125, label: "Select parameter"}));
+const selectParamY1 = (Inputs.select(selectedParamModY1 === "sine" ? paramListSine : paramListDe, {value: "amplitudeRatio", width: 100}));
 const selectedParamY1 = Generators.input(selectParamY1);
 
-const selectParamY2 = (Inputs.select(selectedParamModY2 === "sine" ? paramListSine : paramListDe, {value: "phaseLag", width: 120, label: "Select parameter"}));
+const selectParamY2 = (Inputs.select(selectedParamModY2 === "sine" ? paramListSine : paramListDe, {value: "phaseLag", width: 100}));
 const selectedParamY2 = Generators.input(selectParamY2);
 ```
 
 ## Select parameters for plotting
 Select the model (`sine` or `de`) and the two parameters to plot below in the graphs and on the map.
 
-<div class="grid grid-cols-3"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectParamFilter}
-  </div>
-</div>
 
-<div class="grid grid-cols-3"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    Variable 1 (x in pairs plot)
-    ${selectParamModY1} ${selectParamY1}
-  </div>
-    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    Variable 2 (y in pairs plot)
-    ${selectParamModY2} ${selectParamY2}
-  </div>
-</div>
 
 ---
 
@@ -346,7 +469,7 @@ Select the model (`sine` or `de`) and the two parameters to plot below in the gr
 *Could put these graphs next to each other*
 
 ```js
-plotY1Y2Agg(
+const plottedY1Y2Agg = plotY1Y2Agg(
   selectedParamFilter ? dtMetricsFilteredByParamsAgg : dtMetricsFilteredAgg, 
   selectedParamY1, 
   selectedParamY2, 
@@ -361,7 +484,7 @@ plotY1Y2Agg(
 ## Plot the pairs of parameters against each other
 
 ```js
-plotX1Y1Agg(  
+const plottedX1Y1Agg = plotX1Y1Agg(  
   selectedParamFilter ? dtMetricsFilteredByParamsAgg : dtMetricsFilteredAgg,  
   selectedParamY1, 
   selectedParamY2, 
@@ -378,17 +501,21 @@ The values are the possible values of the selected aggregation level (e.g. 1-12 
 The first selected parameter is color, the second is radius.
 
 ```js
-const aggList = dtMetricsFilteredByParamsAgg.map(d => d.selectedAggregatorValue);
-
-const selectAggValue = (Inputs.range(d3.extent(aggList), {value: aggList[0], step: 1, width: 500, label: "Select value"}));
-const selectedAggValue = Generators.input(selectAggValue);
+const aggregatorText = new Map([
+  ["year", "yearly"],
+  ["season", "seasonal"],
+  ["month", "monthly"],
+  ["week", "weekly"],
+  ["yday", "daily"]
+]);
 ```
 
-<div class="grid grid-cols-2"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    ${selectAggValue}
-  </div>
-</div>
+```js
+const aggList = dtMetricsFilteredByParamsAgg.map(d => d.selectedAggregatorValue);
+
+const selectAggValue = (Inputs.range(d3.extent(aggList), {value: aggList[0], step: 1, width: 300, label: html`Select ${aggregatorText.get(selectedAggregator)} value`}));
+const selectedAggValue = Generators.input(selectAggValue);
+```
 
 ```js
 const dtForMap = dtMetricsFilteredByParamsAgg.filter(d => d.selectedAggregatorValue === selectedAggValue);
@@ -398,43 +525,10 @@ const dtForMap = dtMetricsFilteredByParamsAgg.filter(d => d.selectedAggregatorVa
 /////////
 // Map //
 /////////
-
-const basemaps1 = {
-  USGS_hydro: L.tileLayer(
-    'https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/{z}/{y}/{x}',
-    {
-      attribution: '<a href="http://www.doi.gov">U.S. Department of the Interior</a> | <a href="http://www.usgs.gov">U.S. Geological Survey</a> | <a href="http://www.usgs.gov/laws/policies_notices.html">Policies</a>',
-      maxZoom: 20
-    }
-  ),
-  StreetView: L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',   
-    {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}
-  ),
-  Topography: L.tileLayer.wms(
-    'http://ows.mundialis.de/services/service?',   
-    {layers: 'TOPO-WMS'}
-  ),
-  Places: L.tileLayer.wms(
-    'http://ows.mundialis.de/services/service?', 
-    {layers: 'OSM-Overlay-WMS'}
-  ),
-  USGS_USImagery: L.tileLayer(
-    'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}',
-    {
-      maxZoom: 20,
-      attribution:
-      'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>',
-    }
-  )
-};
+import { baseMap, getMarkerData, updateMarkersMapMod, colorScale } from "./components/mapVariablesModel.js";
 ```
 
 ```js
-/////////
-// Map //
-/////////
-
   const lat = 38.5;
   const lon = -78.0;
   const mag = 9.2;
@@ -453,8 +547,8 @@ const basemaps1 = {
   )
   .addTo(mapMod);
 
-  L.control.layers(basemaps1).addTo(mapMod);
-  basemaps1.USGS_hydro.addTo(mapMod);
+  L.control.layers(baseMap).addTo(mapMod);
+  baseMap.USGS_hydro.addTo(mapMod);
 
   // Store the initial map view
   const initialView = mapMod.getBounds();
@@ -476,48 +570,32 @@ const allDataAggExtent = groupAndAggregate(
 ```
 
 ```js
-function getMarkerData(dIn, variable, func = d3.mean) {
-  const gMean = groupAndAggregate(
-    dIn, // Dataset
-    [variable], // Parameters to aggregate
-    null, // selectedAggregator
-    func, // aggregation function - note this returns an array
-    'siteID'  // Default grouping variables
-  );
-
-  return gMean;
-} 
-```
-
-```js
 const markerDataVar1 = getMarkerData(
   dtForMap.filter(d => d.model === selectedParamModY1), 
   selectedParamY1,
+  groupAndAggregate,
   d3.mean
 ).map(d => ({ ...d, stat: "mean" }));
 
 const markerDataVar2 = getMarkerData(
   dtForMap.filter(d => d.model === selectedParamModY2), 
   selectedParamY2,
+  groupAndAggregate,
   d3.mean
 ).map(d => ({ ...d, stat: "mean" }));
 ```
 
 ```js
-updateMarkersMapMod();
+updateMarkersMapMod(markersLayer, VA_data, markerDataVar1, markerDataVar2, selectedParamY1, selectedParamY2, selectedSites, allDataAggExtent, colorScale);
+```
+
+```js
 ////////////////////////////////////////////////////////
 // Event listener for selectAggValue dropdown updates //
 ////////////////////////////////////////////////////////
 selectAggValue.addEventListener('input', function() {
-  updateMarkersMapMod();
+  updateMarkersMapMod(markersLayer, VA_data, markerDataVar1, markerDataVar2, selectedParamY1, selectedParamY2, selectedSites, allDataAggExtent, colorScale);
 });
-```
-
-```js
-const colorScale = d3.scaleLinear()
-  .domain([0, 0.5, 1]) // The domain is now [0, 1] because the ampRatioMean values have been normalized
-  //    range: ["#00f", "#e31010", "#1685f5"]
-  .range(["#f00a0a", "#f0e40a", "#0d58d1"]);
 ```
 
 ```js
@@ -525,96 +603,14 @@ const markersLayer = L.layerGroup().addTo(mapMod);
 ```
 
 ```js
-//////////////////////////////////////////////
-function updateMarkersMapMod() {
-  markersLayer.clearLayers();
-
-  VA_data.forEach(site => {
-    const siteIDData1 = markerDataVar1.filter(d => d.siteID === site.siteID);
-    const siteIDData2 = markerDataVar2.filter(d => d.siteID === site.siteID);
-
-    if (
-      selectedSites.includes(site.siteID) && 
-      siteIDData1.length > 0 && 
-      siteIDData2.length > 0
-    ) {
-      const siteIDDataAll = allDataAggExtent.filter(d => d.siteID === site.siteID);
-
-      const min1 = siteIDDataAll[0][selectedParamY1][0];
-      const max1 = siteIDDataAll[0][selectedParamY1][1];
-
-      //const siteIDData1 = markerDataVar1.filter(d => d.siteID === site.siteID);
-      const mean1 = siteIDData1.filter(d => d.stat === "mean")[0][selectedParamY1];
-
-      const normVar1 = (mean1 - min1) / (max1 - min1);
-      const markerColor = colorScale(normVar1);
-
-  //display(["1",site.siteID, siteIDDataAll, siteIDData1, mean1, normVar1, siteIDDataAll, allDataAggExtent])
-
-      //const siteIDData2 = markerDataVar2.filter(d => d.siteID === site.siteID);
-      const min2 = siteIDDataAll[0][selectedParamY2][0];
-      const max2 = siteIDDataAll[0][selectedParamY2][1];
-
-      const mean2 = siteIDData2.filter(d => d.stat === "mean")[0][selectedParamY2];
-
-      const normVar2 = (mean2 - min2) / (max2 - min2);
-      const radius = (normVar2 + 1) * 7; // Scale the radius
-
-  //display(["2",site.siteID, siteIDData2, mean2, radius])
-
-      const marker = L.circleMarker([site.lat, site.lon], {
-        color: markerColor,
-        fillColor: markerColor,
-        fillOpacity: 0.95,
-        radius: radius
-      });
-
-      markersLayer.addLayer(marker);
-//display([mean1.toFixed(2), normVar1.toFixed(2), selectedParamY2, mean2.toFixed(2), normVar2.toFixed(2)])
-      marker.bindPopup(`Site ID: ${site.siteID} <br> ${selectedParamY1}: ${mean1.toFixed(2)} (${normVar1.toFixed(2)}) <br> ${selectedParamY2}: ${mean2.toFixed(2)} (${normVar2.toFixed(2)})`);
-      marker.on('mouseover', function (e) {
-        this.openPopup();
-      });
-      marker.on('mouseout', function (e) {
-        this.closePopup();
-      });
-    } else {
-      const markerColor2 = "#6d6d78";
-      const marker = L.circleMarker([site.lat, site.lon], {
-        color: markerColor2,
-        fillColor: markerColor2,
-        fillOpacity: 0.95,
-        radius: 6
-      });
-
-      markersLayer.addLayer(marker);
-
-      marker.bindPopup(`Site ID: ${site.siteID}`);
-      marker.on('mouseover', function (e) {
-        this.openPopup();
-      });
-      marker.on('mouseout', function (e) {
-        this.closePopup();
-      });
-    }
-  });
-}
-```
-
-```js
 const legendColorScale = legend2(colorScale, {
   title: selectedParamY1,
   tickFormat: ".0%"
-})
+});
 ```
 
 ```html
 <div class="card grid grid-cols-4" style="display: flex; flex-direction: column; gap: 1rem; max-width: 900px;">
-  <div class="grid grid-colspan-3" style="margin-left: 10px; margin-bottom: 1px; margin-top: 5px">
-    ${legendColorScale}
-  </div>
-  <div class="grid grid-colspan-3"> 
-      ${div_mapMod}
-  </div>  
+  
 </div>
 ```
