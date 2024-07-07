@@ -28,14 +28,6 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
 
 ---
 
-<div class="grid grid-cols-3"> 
-  <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc;" class="card">
-    ${showWater}
-    ${showAir}
-    
-  </div>
-</div>
-
 ```html
 <div class="wrapper">
   <div class="card selectors"><h1>Selectors</h1>
@@ -47,22 +39,25 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
       <h2>Select years:</h2>
       ${selectYears}
     </div>
+
+    <hr>
+
     <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px;">
-      <h2>Select aggregation level:</h2>
+      <h2>Select <strong>aggregation</strong> level:</h2>
       ${selectAggregator}
     </div>
  
     <hr>
   
     <div style="display: flex; flex-direction: column; align-items: flex-start;">
-      <h2>Show filtered data:</h2>
+      <h2>Show <strong>filtered</strong> data:</h2>
       ${selectParamFilter}
     </div>
 
     <hr>
 
     <div style="display: flex; flex-direction: column; align-items: flex-start;">
-      Variable 1 (y in pairs plot)  
+      <strong>Variable</strong> 1 (x in pairs plot)  
       <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px;">
         Select model: ${selectParamModY1} 
       </div>
@@ -74,7 +69,7 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
     <hr>
 
     <div style="display: flex; flex-direction: column; align-items: flex-start;">
-      Variable 2 (y in pairs plot)  
+      <strong>Variable</strong> 2 (y in pairs plot)  
       <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px;">
         Select model: ${selectParamModY2} 
       </div>
@@ -84,15 +79,25 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
     </div>
   </div>
 
-  <div class="card r1c1"><h2>Time series</h2>
-    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc; margin-top: 10px;">
-      ${facetYearly}
+  <div class="card r1c1"><h2><strong>Time series</strong></h2>
+    Mouse over the time series chart below to see the hourly chart for the chosen site, year, and day of year.<br>    
+    In the sub-daily graph, water temperature is in site-specific color and air temperature is grey. Predictions are the smooth lines.
+    <div class="card" style="display: flex; align-items: center;">
+      <div style="margin-left: 1px; margin-bottom: 1px; margin-top: 5px">
+        ${showWater} 
+      </div>
+      <div style="margin-left: 20px; margin-bottom: 1px; margin-top: 5px; margin-left: 1px;">
+        ${showAir}
+      </div>
+      <div style="margin-left: 20px; margin-bottom: 1px; margin-top: 5px; margin-left: 1px;">
+        ${facetYearly}
+      </div>
     </div>
     <div style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
       ${plottedTimeSeries}
     </div>
   </div>
-  <div class="card r1c2"><h2>Sub-daily plot</h2>
+  <div class="card r1c2"><h2><strong>Sub-daily plot</strong></h2>
     <div style="display: flex; flex-direction: column; align-items: center; margin-top: 40px;">
       ${plottedCurveHover}
     </div>
@@ -109,7 +114,10 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
     </div>
   </div>
 
-  <div class="card r3c1">Map
+  <div class="card r3c1"><h2><strong>Map</strong></h2>  
+    Drag the range slider to select the value of the aggregation level to display on the map.  
+    The values are the possible values of the selected aggregation level (e.g. 1-12 for `month` and 1-366 for `day of year`).  
+    The first selected parameter is color, the second is radius.
     <div class="card" style="display: flex; align-items: center;">
       <div style="margin-left: 10px; margin-bottom: 1px; margin-top: 5px">
         ${legendColorScale} 
@@ -123,37 +131,21 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
     </div>
   </div>
 
-  <div class="r4c1">
-    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
 
-    Extent of raw `k` = ${roundedKExtentSine[0]} to ${roundedKExtentSine[1]} for model `sine`  
-    Extent of raw `k` = ${roundedKExtentDe[0]} to ${roundedKExtentDe[1]} for model `de`
-
-    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-      ${selectMinK} ${selectMaxK}
+  <div class="r4c1234">
+    <div class="card">
+      We can get some unreasonable parameter estimates from the models. Use the silders below to filter the dataset to include only the filtered range of values in the graphs and map below.  
+      For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...`. The range sliders start with reasonable values, but the full or a more limited range can be selected. 
     </div>
 
-    ${Plot.plot({
-      color: {legend: true},
-      height: 300,
-      marks: [
-        Plot.rectY(
-          dtMetricsFiltered.filter(
-            d => d.k >= selectedMinK && d.k <= selectedMaxK
-          ),
-      Plot.binX({y: "count"}, {x: "k", fill: "model"})),
-        Plot.ruleY([0])
-      ]
-      })
-    }
-    </div>
-  </div>
-  <div class="r4c2">
-    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f2f0ed" class="card">
-      Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
+    <div class="r4c1">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
+
+      Extent of raw `k` = ${roundedKExtentSine[0]} to ${roundedKExtentSine[1]} for model `sine`  
+      Extent of raw `k` = ${roundedKExtentDe[0]} to ${roundedKExtentDe[1]} for model `de`
 
       <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-        ${selectMinP} ${selectMaxP}
+        ${selectMinK} ${selectMaxK}
       </div>
 
       ${Plot.plot({
@@ -162,61 +154,85 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
         marks: [
           Plot.rectY(
             dtMetricsFiltered.filter(
-              d => d.p >= selectedMinP && d.p <= selectedMaxP
+              d => d.k >= selectedMinK && d.k <= selectedMaxK
             ),
-        Plot.binX({y: "count"}, {x: "p", fill: "model"})),
+        Plot.binX({y: "count"}, {x: "k", fill: "model"})),
           Plot.ruleY([0])
         ]
         })
       }
+      </div>
     </div>
-  </div>
-  <div class="r4c3">
-    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+    <div class="r4c2">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f2f0ed" class="card">
+        Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
 
-    Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
+        <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+          ${selectMinP} ${selectMaxP}
+        </div>
 
-    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-      ${selectMinTg} ${selectMaxTg}
+        ${Plot.plot({
+          color: {legend: true},
+          height: 300,
+          marks: [
+            Plot.rectY(
+              dtMetricsFiltered.filter(
+                d => d.p >= selectedMinP && d.p <= selectedMaxP
+              ),
+          Plot.binX({y: "count"}, {x: "p", fill: "model"})),
+            Plot.ruleY([0])
+          ]
+          })
+        }
+      </div>
     </div>
+    <div class="r4c3">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
 
-    ${Plot.plot({
-      color: {legend: true},
-      height: 300,
-      marks: [
-        Plot.rectY(
-          dtMetricsFiltered.filter(
-            d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
-          ),
-      Plot.binX({y: "count"}, {x: "Tg", fill: "model"})),
-        Plot.ruleY([0])
-      ]
-      })
-    }
+      Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
+
+      <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+        ${selectMinTg} ${selectMaxTg}
+      </div>
+
+      ${Plot.plot({
+        color: {legend: true},
+        height: 300,
+        marks: [
+          Plot.rectY(
+            dtMetricsFiltered.filter(
+              d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
+            ),
+        Plot.binX({y: "count"}, {x: "Tg", fill: "model"})),
+          Plot.ruleY([0])
+        ]
+        })
+      }
+      </div>
     </div>
-  </div>
-  <div class="r4c4">
-    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+    <div class="r4c4">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
 
-    Extent of raw `rSquared` = ${roundedR2Extent[0]} to ${roundedR2Extent[1]}. need to fix this
+      Extent of raw `rSquared` = ${roundedR2Extent[0]} to ${roundedR2Extent[1]}. need to fix this
 
-    <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-      ${selectMinR2} ${selectMaxR2}
-    </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
+        ${selectMinR2} ${selectMaxR2}
+      </div>
 
-    ${Plot.plot({
-      color: {legend: true},
-      height: 300,
-      marks: [
-        Plot.rectY(
-          dtMetricsFiltered.filter(
-            d => d.rSquaredDE >= selectedMinR2 && d.rSquaredDE <= selectedMaxR2 
-          ),
-      Plot.binX({y: "count"}, {x: "rSquaredDE", fill: "model"})),
-        Plot.ruleY([0])
-      ]
-      })
-    }
+      ${Plot.plot({
+        color: {legend: true},
+        height: 300,
+        marks: [
+          Plot.rectY(
+            dtMetricsFiltered.filter(
+              d => d.rSquaredDE >= selectedMinR2 && d.rSquaredDE <= selectedMaxR2 
+            ),
+        Plot.binX({y: "count"}, {x: "rSquaredDE", fill: "model"})),
+          Plot.ruleY([0])
+        ]
+        })
+      }
+      </div>
     </div>
   </div>
 </div>
