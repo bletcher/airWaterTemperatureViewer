@@ -14,8 +14,8 @@ export default {
         // {name: "Temperature - parquet", path: "/temperatureDataParquet"},
          {name: "Introduction", path: "/introduction"},
          {name: "Raw Temperature", path: "/temperatureDataRaw"},
-         {name: "Modelled Temperature", path: "/temperatureDataModel"},
-         {name: "Modelled Temperature2", path: "/temperatureDataModel2"},
+         {name: "Modelled Temperature-long", path: "/temperatureDataModel"},
+         {name: "Modelled Temperature-wide", path: "/temperatureDataModel2"},
          //{name: "Flow and temperature", path: "/temperatureFlowData"}
        ] 
       }/*,

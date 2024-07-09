@@ -30,7 +30,7 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
 
 ```html
 <div class="wrapper">
-  <div class="card selectors"><h1>Selectors</h1>
+  <div class="card selectors"><h1><strong>Selectors</strong></h1>
     <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px">
       <h2>Select sites:  </h2>
       ${selectSites}
@@ -79,7 +79,7 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
     </div>
   </div>
 
-  <div class="card r1c1"><h2><strong>Time series</strong></h2>
+  <div class="card r1c1"><h1><strong>Time series</strong></h1><br>
     Mouse over the time series chart below to see the hourly chart for the chosen site, year, and day of year.<br>    
     In the sub-daily graph, water temperature is in site-specific color and air temperature is grey. Predictions are the smooth lines.
     <div class="card" style="display: flex; align-items: center;">
@@ -97,7 +97,7 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
       ${plottedTimeSeries}
     </div>
   </div>
-  <div class="card r1c2"><h2><strong>Sub-daily plot</strong></h2>
+  <div class="card r1c2"><h1><strong>Sub-daily plot</strong></h1>
     <div style="display: flex; flex-direction: column; align-items: center; margin-top: 40px;">
       ${plottedCurveHover}
     </div>
@@ -114,7 +114,7 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
     </div>
   </div>
 
-  <div class="card r3c1"><h2><strong>Map</strong></h2>  
+  <div class="card map"><h1><strong>Map</strong></h1><br>  
     Drag the range slider to select the value of the aggregation level to display on the map.  
     The values are the possible values of the selected aggregation level (e.g. 1-12 for `month` and 1-366 for `day of year`).  
     The first selected parameter is color, the second is radius.
@@ -131,14 +131,12 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
     </div>
   </div>
 
-
-  <div class="r4c1234">
-    <div class="card">
-      We can get some unreasonable parameter estimates from the models. Use the silders below to filter the dataset to include only the filtered range of values in the graphs and map below.  
-      For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...`. The range sliders start with reasonable values, but the full or a more limited range can be selected. 
-    </div>
-
-    <div class="r4c1">
+  <div class="card filters">
+    <h1><strong>Filters</strong>- could make this collapsable</h1><br>   
+    We can get some unreasonable parameter estimates from the models. Use the silders below to filter the dataset to include only the filtered range of values in the graphs and map below.  
+    For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...`. The range sliders start with reasonable values, but the full or a more limited range can be selected. 
+    
+    <div class="">
       <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
 
       Extent of raw `k` = ${roundedKExtentSine[0]} to ${roundedKExtentSine[1]} for model `sine`  
@@ -163,7 +161,7 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
       }
       </div>
     </div>
-    <div class="r4c2">
+    <div class="">
       <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f2f0ed" class="card">
         Extent of raw `p` = ${roundedPExtent[0]} to ${roundedPExtent[1]}
 
@@ -186,7 +184,7 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
         }
       </div>
     </div>
-    <div class="r4c3">
+    <div class="">
       <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
 
       Extent of raw `Tg` = ${roundedTgExtent[0]} to ${roundedTgExtent[1]}
@@ -210,7 +208,7 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
       }
       </div>
     </div>
-    <div class="r4c4">
+    <div class="">
       <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
 
       Extent of raw `rSquared` = ${roundedR2Extent[0]} to ${roundedR2Extent[1]}. need to fix this
@@ -455,10 +453,10 @@ const selectedParamFilter = Generators.input(selectParamFilter);
 ```js
 const modelList = ["sine", "de"];
 
-const selectParamModY1 = (Inputs.select(modelList, {value: [modelList[0]], width: 50}));
+const selectParamModY1 = (Inputs.select(modelList, {value: [modelList[0]], width: 20}));
 const selectedParamModY1 = Generators.input(selectParamModY1);
 
-const selectParamModY2 = (Inputs.select(modelList, {value: [modelList[0]], width: 50}));
+const selectParamModY2 = (Inputs.select(modelList, {value: [modelList[0]], width: 20}));
 const selectedParamModY2 = Generators.input(selectParamModY2);
 ```
 
@@ -467,10 +465,10 @@ const paramListDe = ["k", "p", "Tg", "airTemperature", "waterTemperature", "ampl
 const paramListSine = ["k", "p", "Tg", "airTemperature", "waterTemperature", "amplitudeRatio", "phaseLag", "meanOffset", "meanRatio", "phaseAir", "phaseWater", "amplitudeAir", "amplitudeWater"];
 
 
-const selectParamY1 = (Inputs.select(selectedParamModY1 === "sine" ? paramListSine : paramListDe, {value: "amplitudeRatio", width: 100}));
+const selectParamY1 = (Inputs.select(selectedParamModY1 === "sine" ? paramListSine : paramListDe, {value: "amplitudeRatio", width: 50}));
 const selectedParamY1 = Generators.input(selectParamY1);
 
-const selectParamY2 = (Inputs.select(selectedParamModY2 === "sine" ? paramListSine : paramListDe, {value: "phaseLag", width: 100}));
+const selectParamY2 = (Inputs.select(selectedParamModY2 === "sine" ? paramListSine : paramListDe, {value: "phaseLag", width: 50}));
 const selectedParamY2 = Generators.input(selectParamY2);
 ```
 
