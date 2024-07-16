@@ -1,5 +1,7 @@
 # Temperature Raw Data Viewer
 
+Demo at: https://temperature-viewer.s3.us-east-2.amazonaws.com/index.html
+
 Setup steps:
 
 ## Enable command line R
