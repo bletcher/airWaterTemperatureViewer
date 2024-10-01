@@ -13,7 +13,7 @@ import * as d3 from "npm:d3";
 
 ```js
 import { df_metrics_all, df_predict_all, groupAndAggregate, legend2 } from "./components/modelledTemperatureVariables.js";
-import { filterBySiteID_year_season, filterBySiteID_year } from "/components/rawTemperatureVariables.js";
+import { filterBySiteID_year_season, filterBySiteID_year, filterByYear } from "/components/rawTemperatureVariables.js";
 
 import {VA_data} from "./components/rawTemperatureVariables.js";
 ```
@@ -27,6 +27,10 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
 6. **view** map with sites coded by selected parameter values
 
 ---
+
+```js
+//display([dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID])
+```
 
 ```html
 <div class="wrapper">
@@ -56,40 +60,46 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
 
     <hr>
 
-    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-      <strong>Variable</strong> 1 (x in pairs plot)  
+    <div style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 30px;">
+      <strong>Variable 1</strong> (x in pairs plot)  
+      <!--
       <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px;">
         Select model: ${selectParamModY1} 
       </div>
+      -->
       <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 20px;">
         Select parameter: ${selectParamY1}
       </div>
     </div>
-    
-    <hr>
-
+      
     <div style="display: flex; flex-direction: column; align-items: flex-start;">
-      <strong>Variable</strong> 2 (y in pairs plot)  
+      <strong>Variable 2</strong> (y in pairs plot)  
+      <!--
       <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 25px;">
         Select model: ${selectParamModY2} 
       </div>
+      -->
       <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 20px;">
         Select parameter: ${selectParamY2}
       </div>
     </div>
+
+    <hr>
   </div>
 
-  <div class="card r1c1"><h1><strong>Time series</strong></h1><br>
+  <div class="card r1c1">
+    <h1><strong>Time series</strong></h1><br>
     Mouse over the time series chart below to see the hourly chart for the chosen site, year, and day of year.<br>    
-    In the sub-daily graph, water temperature is in site-specific color and air temperature is grey. Predictions are the smooth lines.
-    <div class="card" style="display: flex; align-items: center;">
-      <div style="margin-left: 1px; margin-bottom: 1px; margin-top: 5px">
+    In the sub-daily graph, water temperature is a circle with site-specific color and a solid line and air temperature is the square symbol with the dotted line. Predictions are the smooth lines with associated r-square values for the moused-over site (air is grey).
+    <div class="card" style="display: flex; align-items: center; margin-top: 10px">
+      <div style="margin-left: 1px; margin-bottom: 1px; margin-top: 5px; margin-left: -40px">
         ${showWater} 
       </div>
-      <div style="margin-left: 20px; margin-bottom: 1px; margin-top: 5px; margin-left: 1px;">
+      <div class="vertical-line"></div>
+      <div style="margin-left: 1px; margin-bottom: 1px; margin-top: 5px; margin-left: -70px">
         ${showAir}
       </div>
-      <div style="margin-left: 20px; margin-bottom: 1px; margin-top: 5px; margin-left: 1px;">
+      <div style="margin-left: 1px; margin-bottom: 1px; margin-top: 5px; margin-left: -50px">
         ${facetYearly}
       </div>
     </div>
@@ -98,6 +108,9 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
     </div>
   </div>
   <div class="card r1c2"><h1><strong>Sub-daily plot</strong></h1>
+    <div class="card" style="margin-left: 20px; margin-bottom: 1px; margin-top: 20px; margin-left: 1px;">
+      ${showAllHoverSites}
+    </div>
     <div style="display: flex; flex-direction: column; align-items: center; margin-top: 40px;">
       ${plottedCurveHover}
     </div>
@@ -140,11 +153,30 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
       <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #fafafc" class="card">
 
       Extent of raw `k` = ${roundedKExtentSine[0]} to ${roundedKExtentSine[1]} for model `sine`  
+      <!--
       Extent of raw `k` = ${roundedKExtentDe[0]} to ${roundedKExtentDe[1]} for model `de`
+      -->
 
       <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
-        ${selectMinK} ${selectMaxK}
+        ${selectMinK} 
+        ${selectMaxK}
       </div>
+
+      <!-- with model DE
+      ${Plot.plot({
+              color: {legend: true},
+              height: 300,
+              marks: [
+                Plot.rectY(
+                  dtMetricsFiltered.filter(
+                    d => d.k >= selectedMinK && d.k <= selectedMaxK
+                  ),
+              Plot.binX({y: "count"}, {x: "k", fill: "model"})),
+                Plot.ruleY([0])
+              ]
+              })
+            }
+      -->
 
       ${Plot.plot({
         color: {legend: true},
@@ -152,10 +184,12 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
         marks: [
           Plot.rectY(
             dtMetricsFiltered.filter(
-              d => d.k >= selectedMinK && d.k <= selectedMaxK
+              d => d.k >= selectedMinK && d.k <= selectedMaxK && d.model === "sine"
             ),
-        Plot.binX({y: "count"}, {x: "k", fill: "model"})),
-          Plot.ruleY([0])
+          Plot.binX({y: "count"}, {x: "k", fill: "model"})),
+          Plot.ruleY([0]),
+          Plot.axisX({fontSize: "12px"}),
+          Plot.axisY({fontSize: "12px"})
         ]
         })
       }
@@ -169,19 +203,36 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
           ${selectMinP} ${selectMaxP}
         </div>
 
+        <!-- with DE model
         ${Plot.plot({
-          color: {legend: true},
-          height: 300,
-          marks: [
-            Plot.rectY(
-              dtMetricsFiltered.filter(
-                d => d.p >= selectedMinP && d.p <= selectedMaxP
-              ),
-          Plot.binX({y: "count"}, {x: "p", fill: "model"})),
-            Plot.ruleY([0])
-          ]
-          })
-        }
+                  color: {legend: true},
+                  height: 300,
+                  marks: [
+                    Plot.rectY(
+                      dtMetricsFiltered.filter(
+                        d => d.p >= selectedMinP && d.p <= selectedMaxP
+                      ),
+                  Plot.binX({y: "count"}, {x: "p", fill: "model"})),
+                    Plot.ruleY([0])
+                  ]
+                  })
+                }
+        -->
+          ${Plot.plot({
+            color: {legend: true},
+            height: 300,
+            marks: [
+              Plot.rectY(
+                dtMetricsFiltered.filter(
+                  d => d.p >= selectedMinP && d.p <= selectedMaxP && d.model === "sine"
+                ),
+            Plot.binX({y: "count"}, {x: "p", fill: "model"})),
+            Plot.ruleY([0]),
+            Plot.axisX({fontSize: "12px"}),
+            Plot.axisY({fontSize: "12px"})
+            ]
+            })
+          }
       </div>
     </div>
     <div class="">
@@ -193,21 +244,40 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
         ${selectMinTg} ${selectMaxTg}
       </div>
 
+      <!-- with DE model
+      ${Plot.plot({
+              color: {legend: true},
+              height: 300,
+              marks: [
+                Plot.rectY(
+                  dtMetricsFiltered.filter(
+                    d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
+                  ),
+              Plot.binX({y: "count"}, {x: "Tg", fill: "model"})),
+                Plot.ruleY([0])
+              ]
+              })
+            }
+      -->
+
       ${Plot.plot({
         color: {legend: true},
         height: 300,
         marks: [
           Plot.rectY(
             dtMetricsFiltered.filter(
-              d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg 
+              d => d.Tg >= selectedMinTg && d.Tg <= selectedMaxTg && d.model === "sine"
             ),
-        Plot.binX({y: "count"}, {x: "Tg", fill: "model"})),
-          Plot.ruleY([0])
+          Plot.binX({y: "count"}, {x: "Tg", fill: "model"})),
+          Plot.ruleY([0]),
+          Plot.axisX({fontSize: "12px"}),
+          Plot.axisY({fontSize: "12px"})
         ]
         })
       }
       </div>
     </div>
+    <!--
     <div class="">
       <div style="display: flex; flex-direction: column; align-items: flex-start; background-color: #f7f5f2" class="card">
 
@@ -230,25 +300,17 @@ import {VA_data} from "./components/rawTemperatureVariables.js";
         ]
         })
       }
+      -->
       </div>
     </div>
   </div>
 </div>
 ```
 
-
----
-
+<!--
 ## Select sites and years
+-->
 
-<div class="grid grid-cols-3">
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-    
-  </div>
-  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-
-  </div>
-</div>
 
 ```js
 const dtPredict = [...df_predict_all];
@@ -263,13 +325,13 @@ const dtMetricsFiltered = filterBySiteID_year(dtMetrics, selectedSites, selected
 ```js
 const groupSiteID = [...new Set(dtPredict.map(d => d.siteID))].sort() // for the colorScale
 
-const showAir = (Inputs.radio([true, false], {label: "Show Air Temp?", value: true}));
+const showAir = (Inputs.radio([true, false], {label: html `<div style="margin-left: 60px;">Show <br> Air Temp?</div>`, value: true}));
 const selectedShowAir = Generators.input(showAir);
 
-const showWater = (Inputs.radio([true, false], {label: "Show Water Temp?", value: true}));
+const showWater = (Inputs.radio([true, false], {label: html `<div style="margin-left: 50px;">Show<br>Water Temp?</div>`, value: true}));
 const selectedShowWater = Generators.input(showWater);
 
-const facetYearly = (Inputs.radio([true, false], {label: "Facet by year?", value: false}));
+const facetYearly = (Inputs.radio([true, false], {label: html `<div style="margin-left: 60px;">Facet <br> by year?</div>`, value: false}));
 const selectedFacetYearly = Generators.input(facetYearly);
 
 const sites = [...new Set(dtPredict.map(d => d.siteID))].sort();
@@ -285,6 +347,9 @@ const selectedYears = Generators.input(selectYears);
 const seasons = ["Spring", "Summer", "Autumn", "Winter"];//[...new Set(dt.map(d => d.season))];
 const selectSeasons = (Inputs.select(seasons, {value: seasons, multiple: true, width: 80, label: "Select seasons"}));
 const selectedSeasons = Generators.input(selectSeasons);
+
+const showAllHoverSites = (Inputs.radio([true, false], {label: "Show all selected sites?", value: false}));
+const selectedShowAllHoverSites = Generators.input(showAllHoverSites);
 ```
 
 ```js
@@ -314,14 +379,9 @@ const selectMaxR2 = (Inputs.range([0.01, 1.01], {value: 1, step: 0.01, width: 30
 const selectedMaxR2 = Generators.input(selectMaxR2);
 ```
 
----
-
+<!--
 ## Plot raw data time series
-
-
-
-Mouse over the time series chart below to see the hourly chart for the chosen site, year, and day of year.  
-In the sub-daily graph, water temperature is in site-specific color and air temperature is grey. Predictions are the smooth lines.
+-->
 
 ```js
 const plottedTimeSeries = plotTimeSeries(dtPredictFiltered, groupSiteID, selectedShowWater, selectedShowAir, selectedFacetYearly, width);
@@ -334,32 +394,41 @@ const timeSeriesHover = view(plottedTimeSeries);
 ```js
 const dtPredictHovered = timeSeriesHover === null ?
   null :
-  dtPredictFiltered.filter(d => d.siteID == timeSeriesHover.siteID && d.year == timeSeriesHover.year && d.yday == timeSeriesHover.yday);
+    selectedShowAllHoverSites ?
+    dtPredictFiltered.filter(d => 
+      //d.siteID == timeSeriesHover.siteID && 
+      d.year == timeSeriesHover.year && 
+      d.yday == timeSeriesHover.yday
+    ) :
+      dtPredictFiltered.filter(d => 
+      d.siteID == timeSeriesHover.siteID && 
+      d.year == timeSeriesHover.year && 
+      d.yday == timeSeriesHover.yday
+    );
 ```
 
 ```js
 const dtMetricsHovered = timeSeriesHover === null ?
   null :
-  dtMetricsFiltered.filter(d => d.siteID == timeSeriesHover.siteID && d.year == timeSeriesHover.year && d.yday == timeSeriesHover.yday);
+  dtMetricsFiltered.filter(d => 
+    d.siteID == timeSeriesHover.siteID && 
+    d.year == timeSeriesHover.year && 
+    d.yday == timeSeriesHover.yday
+  );
 ```
 
 ```js
 const plottedCurveHover = plotCurveHover(dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID);
-
-```
-
-```js
 //display([dtPredictHovered, dtMetricsHovered, timeSeriesHover, groupSiteID])
-//display(view(plottedTimeSeries))
 ```
 
-In the graph above, the curve it for the `sine` model is the solid line and for the differential equation model (`de`) the line is dashed. There is no `de` model for air temperature.  
+<!--
+and for the differential equation model (`de`) the line is dashed. There is no `de` model for air temperature.  
+-->
 
----
-
+<!--
 ## Filter on parameters
-We can get some unreaasonable parameter estimates from the models. Use the silders below to filter the dataset to include only the filtered range of values in the graphs and map below.  
-For the parameters `k`, `p`, and `Tg`, the extent of the raw data is shown as `Extent of raw...` . The range sliders start with reasonable values, but the full or a more limited range can be selected.  
+-->
 
 ```js
 const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
@@ -376,7 +445,7 @@ const dtMetricsFilteredByParams = dtMetricsFiltered.filter(
 ```
 
 ```js
-dtMetricsFilteredByParams
+//dtMetricsFilteredByParams
 ```
 
 ```js
@@ -402,10 +471,10 @@ const r2Extent = d3.extent(dtMetricsFiltered, d => d.rSquaredDE);
 const roundedR2Extent = r2Extent.map(value => Number(value.toFixed(2)));
 ```
 
----
-
+<!--
 ## Aggregation
 Select the level of temporal aggregation for the plots and map below.
+-->
 
 ```js
 const aggregator = new Map([
@@ -418,10 +487,6 @@ const aggregator = new Map([
 const selectAggregator = (Inputs.select(aggregator, {value: "yday", multiple: false, width: 100}));
 const selectedAggregator = Generators.input(selectAggregator);
 ```
-
-<div class="grid grid-cols-3"> 
-
-</div>
 
 ```js
 
@@ -441,9 +506,6 @@ const dtMetricsFilteredAgg = groupAndAggregate(
   'siteID', 'year', 'model',  // Default grouping variables
 );
 ```
-
----
-
 
 ```js
 const selectParamFilter = (Inputs.select([true, false], {value: [true], width: 50}));
@@ -472,16 +534,6 @@ const selectParamY2 = (Inputs.select(selectedParamModY2 === "sine" ? paramListSi
 const selectedParamY2 = Generators.input(selectParamY2);
 ```
 
-## Select parameters for plotting
-Select the model (`sine` or `de`) and the two parameters to plot below in the graphs and on the map.
-
-
-
----
-
-## Plot pairs of parameters over day of year
-*Could put these graphs next to each other*
-
 ```js
 const plottedY1Y2Agg = plotY1Y2Agg(
   selectedParamFilter ? dtMetricsFilteredByParamsAgg : dtMetricsFilteredAgg, 
@@ -493,10 +545,6 @@ const plottedY1Y2Agg = plotY1Y2Agg(
 )
 ```
 
----
-
-## Plot the pairs of parameters against each other
-
 ```js
 const plottedX1Y1Agg = plotX1Y1Agg(  
   selectedParamFilter ? dtMetricsFilteredByParamsAgg : dtMetricsFilteredAgg,  
@@ -506,13 +554,6 @@ const plottedX1Y1Agg = plotX1Y1Agg(
   selectedParamModY2
 )
 ```
-
----
-
-## Dynamic sites map
-Drag the range slider to select the value of the aggregation level to display on the map.  
-The values are the possible values of the selected aggregation level (e.g. 1-12 for `month` and 1-366 for `day of year`).  
-The first selected parameter is color, the second is radius.
 
 ```js
 const aggregatorText = new Map([
@@ -623,8 +664,4 @@ const legendColorScale = legend2(colorScale, {
 });
 ```
 
-```html
-<div class="card grid grid-cols-4" style="display: flex; flex-direction: column; gap: 1rem; max-width: 900px;">
-  
-</div>
-```
+

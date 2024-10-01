@@ -8,25 +8,25 @@ export default {
   // lets you organize them into sections and have unlisted pages.
    pages: [
      {
-       name: "Main pages",
+       name: "Chapters",
        pages: [
          //{name: "Temperature", path: "/temperatureData"},
         // {name: "Temperature - parquet", path: "/temperatureDataParquet"},
          {name: "Introduction", path: "/introduction"},
-         {name: "Raw Temperature", path: "/temperatureDataRaw"},
-         {name: "Modelled Temperature-long", path: "/temperatureDataModel"},
-         {name: "Modelled Temperature-wide", path: "/temperatureDataModel2"},
+         {name: "Raw Temperature Data", path: "/temperatureDataRaw"},
+         {name: "Modelled Temperature-wide no DE", path: "/temperatureDataModel2_noDE"},
+
          //{name: "Flow and temperature", path: "/temperatureFlowData"}
        ] 
-      }/*,
+      },
       {
-       name: "Testing",
+       name: "Early versions",
        pages: [
-         {name: "duckDB test - one parquet file", path: "/duckDBTest"},        
-         //{name: "duckDB test - parquet files by site", path: "/duckDBTestBySite"}
-         //{name: "parquetDataLoaderTest", path: "/parquetDataLoaderTest"}
+         {name: "Modelled Temperature-wide", path: "/temperatureDataModel2"},
+         {name: "Modelled Temperature-long", path: "/temperatureDataModel"},
        ]  
-     },
+     }
+     /*
      {
       name: "Examples",
       pages: [

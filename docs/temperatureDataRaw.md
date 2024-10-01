@@ -365,6 +365,7 @@ plotAirWater(dtFiltered, regressionsAirWater, lineData, selectedShowAWLines, sel
 ---
 
 ## Plot hexbin
+Here we show all of the filtered data in one graph.  
 Solid line is the 1:1 line and dashed line is the linear regression.
 
 <div class="grid grid-cols-4">

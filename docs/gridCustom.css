@@ -17,7 +17,7 @@
 
 .selectors {
   grid-column: 1 / 1;
-  grid-row: 1 / 4;
+  grid-row: 1 / 3;
 }
 .r1c1 {
   grid-column: 2 / 7;
@@ -41,7 +41,7 @@
 }
 .filters {
   grid-column: 12 / 12;
-  grid-row: 1 / 4;
+  grid-row: 1 / 3;
   transition: height 0.3s ease;
 }
 .filters.collapsed {
@@ -51,4 +51,10 @@
 .filters.collapsed0 {
   width: 0;
   overflow: hidden;
+}
+
+.vertical-line {
+  width: 1px;
+  background-color: rgb(31, 29, 29);
+  margin: 0 10px;
 }

@@ -6,6 +6,8 @@
   
 Recently, researchers have explored the relationship between air and water temperatures in streams in a slightly more complicated way using time series data and the assumption that the data follow **`sine`** functions. The extent of coupling between air and water temperatures can be explored by estimating the phase shift (lag) and amplitude difference between curves for air and water temperatures. These analyses were intially done on annual time series, but new developments in this research area include within-day estimates of these relationships, which gives a more fine-tuned view of stream temperatures. We can explore these relationships (at multiple levels of aggregation) in this explorer by selecting the `sine` model.  
   
+---  
+**The differential equation approach described below is _on hold_ awaiting further development**  
 In addition to the slope of the relationship between air and water temperatures and phase shift and amplitude differences between air and water temperature time series data, we also present a new approach that uses differential equations (the **`de`** model) to estimate the time series parameters for temperatures. This approach is more flexible than using a fixed function and also provides additional information. With this explorer, you can compare the two (`sine` and `de`) approaches.  
 
 The **`de`** approach fits an ordinary differential equation for heat transfer:  

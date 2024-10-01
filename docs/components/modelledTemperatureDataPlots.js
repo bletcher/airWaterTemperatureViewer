@@ -17,6 +17,7 @@ export function plotTimeSeries(d, groupSiteID, showWater, showAir, selectedFacet
     //width: 1800, // need to make this responsive ////////////////////////////////
     marginTop: 30,
     marginRight: 50,
+    marginBottom: 50,
     //color: {...d => colorScale.includes(d.siteID), legend: true},
     color: {...colorScale, legend: false},
     //x: {domain: selectedFacetYearly ? [0,366] : d3.extent(d => d.dateTime), label: "Day of year"},
@@ -47,7 +48,9 @@ export function plotTimeSeries(d, groupSiteID, showWater, showAir, selectedFacet
             fx: "siteID",
             tip: showWater && showAir ? false : true
           }
-        )
+        ),
+        Plot.axisX({fontSize: "12px"}),
+        Plot.axisY({fontSize: "12px"})
     ]
   });
 
@@ -94,7 +97,8 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
             y: "waterTemperature",
             r: 5,
             fill: "siteID",
-            marker: "circle-stroke"
+            marker: "circle-stroke",
+            tip: true
             //tip: true
           }
         ),
@@ -106,6 +110,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
             //marker: "circle-stroke"
           }
         ),
+        /*
         Plot.line(dInPredict, 
           {
             x: "hour", 
@@ -115,25 +120,27 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
             //marker: "circle-stroke"
           }
         ),
-
-        Plot.dot(dInPredict, 
+       */
+      Plot.dot(dInPredict, 
         {
           x: "hour", 
           y: "airTemperature",
-          r: 5,
+          r: 4,
           fill: "darkgrey",
-          marker: "circle-stroke"
-          //tip: true
+          symbol: "square", //"circle-stroke",
+          stroke: "siteID",
+          tip: true
         }
       ),
       Plot.line(dInPredict, 
         {
           x: "hour", 
           y: "airTemperaturePredict_sine",
-          stroke: "darkgrey",
-          //marker: "circle-stroke"
+          stroke: "siteID",
+          strokeDasharray: "4,5"
         }
       ),
+      /*
       Plot.line(dInPredict, 
         {
           x: "hour", 
@@ -143,13 +150,14 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
           //marker: "circle-stroke"
         }
       ),
-
+      */
       Plot.text(dInMetrics.filter(dd => dd.model === "sine"),
         Plot.selectLast({
           x: 24,//"hour", 
           y: "airTemperature", 
           fill: "darkgrey",
-          text: d => d.rSquaredAir === null ? null : `sine: ${rSquaredText}= ${d.rSquaredAir.toFixed(2)}`,  
+          //text: d => d.rSquaredAir === null ? null : `sine: ${rSquaredText}= ${d.rSquaredAir.toFixed(2)}`,  
+          text: d => d.rSquaredAir === null ? null : `${rSquaredText}= ${d.rSquaredAir.toFixed(2)}`,  
           lineAnchor: "middle", 
           dy: 0, dx: 20
         })
@@ -159,11 +167,15 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
           x: 24,//"hour", 
           y: "waterTemperature", 
           fill: "siteID",
-          text: d => d.rSquaredWater === null ? null : `sine: ${rSquaredText}= ${d.rSquaredWater.toFixed(2)}`,  
+          //text: d => d.rSquaredWater === null ? null : `sine: ${rSquaredText}= ${d.rSquaredWater.toFixed(2)}`,  
+          text: d => d.rSquaredWater === null ? null : `${rSquaredText}= ${d.rSquaredWater.toFixed(2)}`, 
           lineAnchor: "bottom", 
           dy: 0, dx: 20
         })
-      ), 
+      ),
+      Plot.axisX({fontSize: "12px"}),
+      Plot.axisY({fontSize: "12px"})
+      /*
       Plot.text(dInMetrics.filter(dd => dd.model === "de"),
         Plot.selectLast({
           x: 24,//"hour", 
@@ -174,6 +186,7 @@ export function plotCurveHover(dInPredict, dInMetrics, timeSeriesHover, groupSit
           dy: 15, dx: 16
         })
       )
+      */
       ]
     });
   }
@@ -207,7 +220,9 @@ function plotPhaseAmpXY(d, years, {width} = {}) {
           fy: "siteID",
           tip: true
         }
-      )
+      ),
+      Plot.axisX({fontSize: "12px"}),
+      Plot.axisY({fontSize: "12px"})
     ]
   });
 }
@@ -282,7 +297,9 @@ export function plotX1Y1(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
           fy: "siteID",
           tip: true
         }
-      )
+      ),
+      Plot.axisX({fontSize: "12px"}),
+      Plot.axisY({fontSize: "12px"})
     ]
   });
 }
@@ -339,8 +356,8 @@ export function plotX1Y1Agg(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
     marginTop: 30,
     marginRight: 70,
     color: {...colorScale, legend: true},
-    x: {label: xVar},
-    y: {axis: "left", label: yVar},
+    //x: {label: xVar},
+    //y: {axis: "left", label: yVar},
     marks: [
       Plot.frame({stroke: "lightgrey"}),
       Plot.dot(dXY,
@@ -352,7 +369,9 @@ export function plotX1Y1Agg(dIn, xVar, yVar, xMod, yMod, {width} = {}) {
           fy: "siteID",
           tip: true
         }
-      )
+      ),
+      Plot.axisX({fontSize: "12px", label: xVar}),
+      Plot.axisY({fontSize: "12px", label: yVar})
     ]
   });
 }
@@ -375,10 +394,11 @@ export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {
   return Plot.plot({
     width,
     marginTop: 30,
-    marginRight: 30,
+    marginRight: 50,
     //color: {legend: true, label: "Day of year"},
-    x: {label: selectedAggregator},
-    y: {axis: "left", label: y1Var},
+    //x: {label: selectedAggregator},
+    //y: {axis: "left", label: y1Var},
+    facet: {label: null},
     marks: [
       Plot.frame({stroke: "lightgrey"}),
       Plot.dot(d1,
@@ -398,7 +418,8 @@ export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {
           anchor: "right", 
           label: y2Var,
           y: y2, 
-          tickFormat: y2.tickFormat()
+          tickFormat: y2.tickFormat(),
+          fontSize: "12px"
         }
       ), 
 
@@ -412,7 +433,9 @@ export function plotY1Y2Agg(d, y1Var, y2Var, y1Mod, y2Mod, selectedAggregator, {
             fx: "siteID",
             tip: true
           }
-      ))
+      )),
+      Plot.axisX({fontSize: "12px", label: selectedAggregator}),
+      Plot.axisY({fontSize: "12px", label: y1Var})      
     ]
   });
 }

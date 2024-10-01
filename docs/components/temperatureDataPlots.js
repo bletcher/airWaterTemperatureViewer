@@ -13,7 +13,7 @@ export function plotAirWater(dIn, regressions, lineData, selectedShowAWLines, se
     [minR, selectedMaxR]
     //[3, 50]
   );
-console.log(selectedMaxR, dischargeScale(0))
+//console.log(selectedMaxR, dischargeScale(0))
 
   const colorScale = Plot.scale({
     color: {
@@ -104,7 +104,7 @@ export function plotHexBin(d, lineData, binWidthIn, selectedRAsCount, {width} = 
       Plot.dot(d, 
         Plot.hexbin(
           {fill: "count", r: selectedRAsCount ? "count" : undefined}, 
-          {x: "airTemperature", y: "waterTemperature",  fill: "count", binWidth: binWidthIn}
+          {x: "airTemperature", y: "waterTemperature", fill: "count", binWidth: binWidthIn}
         )
       ),
       Plot.line(lineData, {x: "x", y: "y", stroke: "black"}),
