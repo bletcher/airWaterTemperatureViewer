@@ -16,7 +16,19 @@ Add .R and .RScript to [Path](https://info201.github.io/r-intro.html#windows-com
 4) Make changes for deploying suggested [here](https://observablehq.com/framework/deploying#other-hosting-services).  
 5) In the terminal, run `npm run build` to build the site in /dist.  
 6) Copy files from /dist to temperature-viewer S3 bucket. Best to open file explorer and drag the files and folders in /dist into the S3 upload space.  
-
+7) make sure to enable static web hosting and to add a bucket policy like:
+   {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::temperature-viewer/*"
+        }
+    ]
+}
 
 Notes:
 1) To force rerun of cached objects, run: `rm docs/.observablehq/cache/data/*.*` with approriate changes for specific files or file types.  
